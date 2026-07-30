@@ -10,6 +10,17 @@ class GovernmentDataFetcher {
   constructor() {
     this.liveDisasterIndex = [
       {
+        id: "fdma-kumamoto-2026-dai13hou",
+        source: "総務省消防庁 非常災害対策本部",
+        title: "令和8年熊本地震による被害状況および避難指示発令状況について（第13報・最新）",
+        disaster_name: "令和8年熊本地震 (消防庁被害速報第13報・最新)",
+        timestamp: "2026-07-30T20:30:00Z",
+        keywords: ["令和8年熊本地震", "第13報", "熊本地震第13報", "13報", "消防庁", "熊本", "益城", "西原", "南阿蘇", "菊陽", "宇土", "八代", "御船", "避難指示"],
+        aliases: ["令和8年熊本地震 第13報", "熊本地震第13報", "第13報", "13報", "消防庁第13報", "令和8年熊本地震第13報"],
+        url: "https://www.fdma.go.jp/disaster/info/items/20260730_kumamoto_13.pdf",
+        text: "総務省消防庁被害状況緊急公表（第13報）。令和8年熊本地震における全自治体最新被害速報。熊本市で全壊5400棟、半壊14500棟、断水38000戸、避難者12800人。益城町で全壊3500棟、断水14000戸、避難者5700人。西原村で全壊630棟、断水2800戸、避難者2450人。南阿蘇村で全壊960棟、避難者2150人。菊陽町で全壊420棟、断水6200戸。宇土市で全壊490棟、断水5100戸。八代市で住家被害730棟、避難者3850人。"
+      },
+      {
         id: "soumu-kumamoto-2026-latest",
         source: "総務省 非常災害対策本部",
         title: "令和8年熊本地震に関する被害状況及び対応状況（総務省緊急発表 第8報）",
@@ -96,6 +107,8 @@ class GovernmentDataFetcher {
     if (!query) return "";
     let q = query.trim().toLowerCase();
     
+    // 全角数字・英数を半角に統一
+    q = q.replace(/[０-９]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 0xfee0));
     // 全角スペースを半角に統一
     q = q.replace(/　/g, " ");
 
