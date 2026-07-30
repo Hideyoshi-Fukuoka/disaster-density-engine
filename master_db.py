@@ -15,10 +15,8 @@ from typing import Dict, Any, Optional
 
 class MasterDB:
     def __init__(self, seed_file_path: Optional[str] = None):
-        self.jis_map: Dict[str, Dict[str, Any]] = {}
-        self.alias_map: Dict[str, Dict[str, Any]] = {}
+        self.records: List[Dict[str, Any]] = []
 
-        # デフォルトのシードデータパス決定
         if seed_file_path is None:
             base_dir = os.path.dirname(os.path.abspath(__file__))
             json_path = os.path.join(base_dir, "seeds", "municipalities_master.json")
@@ -38,15 +36,14 @@ class MasterDB:
         """JSONまたはCSVからシードデータを読み込む"""
         if file_path.endswith(".json"):
             with open(file_path, "r", encoding="utf-8") as f:
-                records = json.load(f)
-                for record in records:
-                    self._register_record(record)
+                self.records = json.load(f)
         elif file_path.endswith(".csv"):
             with open(file_path, "r", encoding="utf-8") as f:
                 reader = csv.DictReader(f)
                 for row in reader:
                     aliases = [a.strip() for a in row.get("aliases", "").split("|") if a.strip()]
-                    record = {
+                    self.records.append({
+                        "year": int(row.get("year", 2026)),
                         "jis_code": row["jis_code"],
                         "prefecture": row["prefecture"],
                         "city_name": row["city_name"],
@@ -54,90 +51,79 @@ class MasterDB:
                         "total_population": int(row["total_population"]),
                         "total_buildings": int(row["total_buildings"]),
                         "aliases": aliases
-                    }
-                    self._register_record(record)
-
-    def _register_record(self, record: Dict[str, Any]):
-        jis_code = record["jis_code"]
-        pref = record.get("prefecture", "")
-        city = record.get("city_name", "")
-
-        self.jis_map[jis_code] = record
-
-        # 名寄せ用エイリアスマップへのインデックス構築
-        self.alias_map[city] = record
-        self.alias_map[f"{pref}{city}"] = record
-
-        for alias in record.get("aliases", []):
-            self.alias_map[alias] = record
-            self.alias_map[f"{pref}{alias}"] = record
+                    })
 
     def _load_fallback_data(self):
         """ファイルが存在しない場合のデフォルト組込みデータ"""
-        default_records = [
+        self.records = [
             {
-                "jis_code": "43201", "prefecture": "熊本県", "city_name": "熊本市",
+                "year": 2016, "jis_code": "43201", "prefecture": "熊本県", "city_name": "熊本市",
                 "total_households": 320000, "total_population": 738000, "total_buildings": 340000,
                 "aliases": ["熊本市", "熊本市中央区", "熊本市東区", "熊本"]
             },
             {
-                "jis_code": "43441", "prefecture": "熊本県", "city_name": "益城町",
+                "year": 2016, "jis_code": "43441", "prefecture": "熊本県", "city_name": "益城町",
                 "total_households": 13500, "total_population": 34000, "total_buildings": 14200,
                 "aliases": ["益城町", "熊本県上益城郡益城町", "上益城郡益城町", "益城"]
             },
             {
-                "jis_code": "43443", "prefecture": "熊本県", "city_name": "西原村",
-                "total_households": 2600, "total_population": 6800, "total_buildings": 2750,
-                "aliases": ["西原村", "阿蘇郡西原村", "西原"]
+                "year": 2026, "jis_code": "43201", "prefecture": "熊本県", "city_name": "熊本市",
+                "total_households": 338000, "total_population": 738000, "total_buildings": 395000,
+                "aliases": ["熊本市", "熊本市中央区", "熊本"]
+            },
+            {
+                "year": 2026, "jis_code": "43441", "prefecture": "熊本県", "city_name": "益城町",
+                "total_households": 15800, "total_population": 34800, "total_buildings": 16500,
+                "aliases": ["益城町", "益城"]
             }
         ]
-        for r in default_records:
-            self._register_record(r)
 
-    def resolve(self, raw_name: str) -> Optional[Dict[str, Any]]:
+    def resolve(self, raw_name: str, target_year: int = 2026) -> Optional[Dict[str, Any]]:
         """
-        自治体名（例: '益城町', '熊本県益城町', '熊本県上益城郡益城町'）の表記ゆらぎを吸収し
-        JISコード、正式名称、世帯数などの情報を返す。
+        自治体名と災害発生年で表記ゆらぎを吸収し、災害発生直前の最大年度マスター情報を返す
         """
         if not raw_name or not isinstance(raw_name, str):
             return None
 
         clean_name = raw_name.strip()
-
-        # 1. 完全一致/エイリアス一致
-        if clean_name in self.alias_map:
-            return self.alias_map[clean_name]
-
-        # 2. 都道府県名や郡名の正規化除去（「熊本県」「上益城郡」などを取り除いて判定）
         stripped = re.sub(r'^(熊本県|石川県|宮城県|東京都|大阪府|福岡県|大分県)', '', clean_name)
         stripped = re.sub(r'^[一-龠ぁ-んァ-ヶ]+郡', '', stripped)
 
-        if stripped in self.alias_map:
-            return self.alias_map[stripped]
+        candidates = []
+        for r in self.records:
+            match_city = (r["city_name"] == clean_name or r["city_name"] == stripped)
+            match_alias = any(a == clean_name or a == stripped for a in r.get("aliases", []))
+            match_partial = (clean_name in r["city_name"] or r["city_name"] in clean_name)
+            if match_city or match_alias or match_partial:
+                candidates.append(r)
 
-        # 3. 部分一致検索
-        for alias, record in self.alias_map.items():
-            if clean_name in alias or alias in clean_name:
-                return record
+        if not candidates:
+            return None
 
-        return None
+        valid_by_year = [c for c in candidates if c.get("year", 2026) <= target_year]
+        if valid_by_year:
+            valid_by_year.sort(key=lambda x: x.get("year", 2026), reverse=True)
+            return valid_by_year[0]
 
-    def get_households(self, raw_name: str) -> Optional[int]:
-        """自治体名から世帯数（分母）を取得"""
-        record = self.resolve(raw_name)
+        candidates.sort(key=lambda x: x.get("year", 2026))
+        return candidates[0]
+
+    def get_households(self, raw_name: str, target_year: int = 2026) -> Optional[int]:
+        """自治体名と災害年次から世帯数（分母）を取得"""
+        record = self.resolve(raw_name, target_year)
         return record["total_households"] if record else None
 
 
 # シンジングルトンインスタンス
 _db_instance = MasterDB()
 
-def resolve_municipality(raw_name: str) -> Optional[Dict[str, Any]]:
+def resolve_municipality(raw_name: str, target_year: int = 2026) -> Optional[Dict[str, Any]]:
     """自治体名のゆらぎを吸収してJISコードとマスター情報を返すヘルパー関数"""
-    return _db_instance.resolve(raw_name)
+    return _db_instance.resolve(raw_name, target_year)
 
-def get_households(raw_name: str) -> Optional[int]:
+def get_households(raw_name: str, target_year: int = 2026) -> Optional[int]:
     """自治体名から世帯数を返すヘルパー関数"""
-    return _db_instance.get_households(raw_name)
+    return _db_instance.get_households(raw_name, target_year)
 
 
 # 単体動作テスト

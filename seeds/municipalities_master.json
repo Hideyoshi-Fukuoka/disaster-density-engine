@@ -1,122 +1,202 @@
 [
   {
+    "year": 2016,
     "jis_code": "43201",
     "prefecture": "熊本県",
     "city_name": "熊本市",
-    "city_kana": "クマモトシ",
-    "total_households": 338000,
+    "total_households": 320000,
     "total_population": 738000,
-    "total_buildings": 395000,
+    "total_buildings": 340000,
     "aliases": ["熊本市", "熊本市中央区", "熊本市東区", "熊本市西区", "熊本市南区", "熊本市北区", "熊本"]
   },
   {
+    "year": 2016,
     "jis_code": "43441",
     "prefecture": "熊本県",
     "city_name": "益城町",
-    "city_kana": "マシキマチ",
-    "total_households": 15800,
-    "total_population": 34800,
-    "total_buildings": 16500,
-    "aliases": ["益城町", "熊本県上益城郡益城町", "上益城郡益城町", "益城"]
+    "total_households": 13500,
+    "total_population": 34000,
+    "total_buildings": 14200,
+    "aliases": ["益城町", "益城"]
   },
   {
+    "year": 2016,
     "jis_code": "43443",
     "prefecture": "熊本県",
     "city_name": "西原村",
-    "city_kana": "ニシハラムラ",
-    "total_households": 3100,
-    "total_population": 6900,
-    "total_buildings": 3300,
-    "aliases": ["西原村", "熊本県阿蘇郡西原村", "阿蘇郡西原村", "西原"]
+    "total_households": 2600,
+    "total_population": 6800,
+    "total_buildings": 2750,
+    "aliases": ["西原村", "西原"]
   },
   {
+    "year": 2016,
     "jis_code": "43442",
     "prefecture": "熊本県",
     "city_name": "南阿蘇村",
-    "city_kana": "ミナミアソムラ",
-    "total_households": 4500,
+    "total_households": 4200,
     "total_population": 10500,
-    "total_buildings": 4900,
-    "aliases": ["南阿蘇村", "熊本県阿蘇郡南阿蘇村", "阿蘇郡南阿蘇村", "南阿蘇"]
+    "total_buildings": 4600,
+    "aliases": ["南阿蘇村", "南阿蘇"]
   },
   {
-    "jis_code": "43401",
-    "prefecture": "熊本県",
-    "city_name": "菊陽町",
-    "city_kana": "キクヨウマチ",
-    "total_households": 19800,
-    "total_population": 44200,
-    "total_buildings": 20500,
-    "aliases": ["菊陽町", "菊陽"]
-  },
-  {
+    "year": 2016,
     "jis_code": "43211",
     "prefecture": "熊本県",
     "city_name": "宇土市",
-    "city_kana": "ウトシ",
-    "total_households": 15200,
+    "total_households": 14800,
     "total_population": 36500,
-    "total_buildings": 16000,
+    "total_buildings": 15500,
     "aliases": ["宇土市", "宇土"]
   },
   {
+    "year": 2016,
     "jis_code": "43202",
     "prefecture": "熊本県",
     "city_name": "八代市",
-    "city_kana": "ヤツシロシ",
-    "total_households": 53500,
+    "total_households": 51000,
     "total_population": 123000,
-    "total_buildings": 56000,
+    "total_buildings": 53500,
     "aliases": ["八代市", "八代"]
   },
   {
+    "year": 2020,
+    "jis_code": "43203",
+    "prefecture": "熊本県",
+    "city_name": "人吉市",
+    "total_households": 13000,
+    "total_population": 31500,
+    "total_buildings": 13800,
+    "aliases": ["人吉市", "人吉"]
+  },
+  {
+    "year": 2020,
     "jis_code": "43444",
     "prefecture": "熊本県",
     "city_name": "御船町",
-    "city_kana": "ミフネマチ",
-    "total_households": 7200,
+    "total_households": 6700,
     "total_population": 16800,
-    "total_buildings": 7600,
+    "total_buildings": 7100,
     "aliases": ["御船町", "御船"]
   },
   {
+    "year": 2024,
     "jis_code": "17204",
     "prefecture": "石川県",
     "city_name": "輪島市",
-    "city_kana": "ワジマシ",
     "total_households": 10200,
     "total_population": 23500,
     "total_buildings": 11000,
     "aliases": ["輪島市", "輪島"]
   },
   {
+    "year": 2024,
     "jis_code": "17205",
     "prefecture": "石川県",
     "city_name": "珠洲市",
-    "city_kana": "スズシ",
     "total_households": 5600,
     "total_population": 12800,
     "total_buildings": 6000,
     "aliases": ["珠洲市", "珠洲"]
   },
   {
+    "year": 2024,
     "jis_code": "17463",
     "prefecture": "石川県",
     "city_name": "能登町",
-    "city_kana": "ノトチョウ",
     "total_households": 6500,
     "total_population": 15000,
     "total_buildings": 6900,
-    "aliases": ["能登町", "鳳珠郡能登町", "能登"]
+    "aliases": ["能登町", "能登"]
   },
   {
-    "jis_code": "04201",
-    "prefecture": "宮城県",
-    "city_name": "仙台市",
-    "city_kana": "センダイシ",
-    "total_households": 520000,
-    "total_population": 1090000,
-    "total_buildings": 540000,
-    "aliases": ["仙台市", "仙台市青葉区", "仙台市宮城野区", "仙台市若林区", "仙台市太白区", "仙台市泉区", "仙台"]
+    "year": 2024,
+    "jis_code": "17407",
+    "prefecture": "石川県",
+    "city_name": "穴水町",
+    "total_households": 3400,
+    "total_population": 7800,
+    "total_buildings": 3600,
+    "aliases": ["穴水町", "穴水"]
+  },
+  {
+    "year": 2026,
+    "jis_code": "43201",
+    "prefecture": "熊本県",
+    "city_name": "熊本市",
+    "total_households": 338000,
+    "total_population": 738000,
+    "total_buildings": 395000,
+    "aliases": ["熊本市", "熊本市中央区", "熊本市東区", "熊本市西区", "熊本市南区", "熊本市北区", "熊本"]
+  },
+  {
+    "year": 2026,
+    "jis_code": "43441",
+    "prefecture": "熊本県",
+    "city_name": "益城町",
+    "total_households": 15800,
+    "total_population": 34800,
+    "total_buildings": 16500,
+    "aliases": ["益城町", "益城"]
+  },
+  {
+    "year": 2026,
+    "jis_code": "43443",
+    "prefecture": "熊本県",
+    "city_name": "西原村",
+    "total_households": 3100,
+    "total_population": 6900,
+    "total_buildings": 3300,
+    "aliases": ["西原村", "西原"]
+  },
+  {
+    "year": 2026,
+    "jis_code": "43442",
+    "prefecture": "熊本県",
+    "city_name": "南阿蘇村",
+    "total_households": 4500,
+    "total_population": 10500,
+    "total_buildings": 4900,
+    "aliases": ["南阿蘇村", "南阿蘇"]
+  },
+  {
+    "year": 2026,
+    "jis_code": "43401",
+    "prefecture": "熊本県",
+    "city_name": "菊陽町",
+    "total_households": 19800,
+    "total_population": 44200,
+    "total_buildings": 20500,
+    "aliases": ["菊陽町", "菊陽"]
+  },
+  {
+    "year": 2026,
+    "jis_code": "43211",
+    "prefecture": "熊本県",
+    "city_name": "宇土市",
+    "total_households": 15200,
+    "total_population": 36500,
+    "total_buildings": 16000,
+    "aliases": ["宇土市", "宇土"]
+  },
+  {
+    "year": 2026,
+    "jis_code": "43202",
+    "prefecture": "熊本県",
+    "city_name": "八代市",
+    "total_households": 53500,
+    "total_population": 123000,
+    "total_buildings": 56000,
+    "aliases": ["八代市", "八代"]
+  },
+  {
+    "year": 2026,
+    "jis_code": "43444",
+    "prefecture": "熊本県",
+    "city_name": "御船町",
+    "total_households": 7200,
+    "total_population": 16800,
+    "total_buildings": 7600,
+    "aliases": ["御船町", "御船"]
   }
 ]

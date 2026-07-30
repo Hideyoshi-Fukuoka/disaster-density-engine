@@ -8,13 +8,14 @@ class EntityResolver {
   /**
    * 抽出されたエンティティリストをJISコードとマスターデータへ名寄せ結合する
    * @param {Array<Object>} extractedEntities 
+   * @param {number} targetYear 災害発生年（例: 2016, 2024, 2026）
    * @returns {Array<Object>}
    */
-  resolveList(extractedEntities) {
+  resolveList(extractedEntities, targetYear = 2026) {
     if (!Array.isArray(extractedEntities)) return [];
 
     return extractedEntities.map(entity => {
-      const masterRecord = masterDB.findByName(entity.city_name);
+      const masterRecord = masterDB.findByName(entity.city_name, targetYear);
 
       if (masterRecord) {
         return {
@@ -25,6 +26,7 @@ class EntityResolver {
           total_households: masterRecord.total_households,
           total_population: masterRecord.total_population,
           total_buildings: masterRecord.total_buildings,
+          total_base_year: masterRecord.year || targetYear,
           is_resolved: true
         };
       } else {
@@ -37,6 +39,7 @@ class EntityResolver {
           total_households: 10000, // 推定値
           total_population: 25000,
           total_buildings: 10000,
+          total_base_year: targetYear,
           is_resolved: false
         };
       }

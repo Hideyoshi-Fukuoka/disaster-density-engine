@@ -255,6 +255,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <td>${damageTypeLabel}</td>
         <td><strong>${item.metrics.absolute_count.toLocaleString()}</strong></td>
         <td>${item.metrics.total_base.toLocaleString()}</td>
+        <td><span class="badge tech-tag" style="font-size:11px;">${item.metrics.total_base_year || 2026}年統計</span></td>
         <td style="font-weight:bold; font-size:15px; color:${getRankColor(item.metrics.severity_rank)};">
           ${item.metrics.relative_rate_percent}%
         </td>

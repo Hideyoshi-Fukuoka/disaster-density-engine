@@ -71,6 +71,7 @@ class MathEngine {
           damage_type: item.damage_type,
           absolute_count: item.absolute_count,
           total_base: totalBase,
+          total_base_year: item.total_base_year || 2026,
           relative_rate_percent: relativeRatePercent,
           severity_rank: severityRank
         }

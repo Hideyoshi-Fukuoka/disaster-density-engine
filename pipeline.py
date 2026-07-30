@@ -114,27 +114,46 @@ class DisasterDensityPipeline:
         else:
             return "LOW"
 
+    def _detect_year(self, text: str, disaster_name: str) -> int:
+        combined = (disaster_name + " " + text).lower()
+        if "平成28年" in combined or "2016" in combined:
+            return 2016
+        if "令和2年" in combined or "2020" in combined:
+            return 2020
+        if "令和6年" in combined or "2024" in combined:
+            return 2024
+        if "令和8年" in combined or "2026" in combined:
+            return 2026
+        
+        m = re.search(r"(20\d{2})年", combined)
+        if m:
+            return int(m.group(1))
+        return 2026
+
     def process(self, text: str, disaster_name: str = "熊本地震（想定データ）") -> Dict[str, Any]:
         """
         テキストを入力とし、名寄せ結合・相対被害率計算を行い要求フォーマットの JSON スキーマを出力する
         """
+        disaster_year = self._detect_year(text, disaster_name)
         extracted_entities = self.extractor.extract(text)
         formatted_data = []
 
         for entity in extracted_entities:
             raw_city = entity["city_name"]
-            master_record = resolve_municipality(raw_city)
+            master_record = resolve_municipality(raw_city, disaster_year)
 
             if master_record:
                 jis_code = master_record["jis_code"]
                 prefecture = master_record["prefecture"]
                 city_name = master_record["city_name"]
                 total_base = self._select_total_base(entity["damage_type"], master_record)
+                total_base_year = master_record.get("year", disaster_year)
             else:
                 jis_code = "99999"
                 prefecture = "不明"
                 city_name = raw_city
                 total_base = 10000
+                total_base_year = disaster_year
 
             abs_count = entity["absolute_count"]
             raw_rate = round((abs_count / total_base) * 100, 2) if total_base > 0 else 0.0
@@ -150,6 +169,7 @@ class DisasterDensityPipeline:
                     "damage_type": entity["damage_type"],
                     "absolute_count": abs_count,
                     "total_base": total_base,
+                    "total_base_year": total_base_year,
                     "relative_rate_percent": rate_percent,
                     "severity_rank": severity_rank
                 }

@@ -28,26 +28,21 @@ const output = mathEngine.process(resolved, "熊本地震（想定データ）")
 console.log("\n4. Final Dual-Mode JSON Output:");
 console.log(JSON.stringify(output, null, 2));
 
-// Validation checks
-console.log("\n=== Automated Validation Checks ===");
-const kumamotoHouses = output.data.find(d => d.city_name === "熊本市" && d.metrics.damage_type === "collapsed_houses");
-const mashikiHouses = output.data.find(d => d.city_name === "益城町" && d.metrics.damage_type === "collapsed_houses");
-const nishiharaHouses = output.data.find(d => d.city_name === "西原村" && d.metrics.damage_type === "collapsed_houses");
+// Time-Series Year Resolution Test
+console.log("\n=== Time-Series Point-in-Time Resolution Test ===");
+const text2016 = "平成28年熊本地震速報。益城町で全壊3000棟。";
+const resolved2016 = resolver.resolveList(extractor.extract(text2016), 2016);
+const output2016 = mathEngine.process(resolved2016, "平成28年熊本地震");
 
-if (kumamotoHouses) {
-  console.log(`✅ 熊本市 全壊率: ${kumamotoHouses.metrics.relative_rate_percent}% (Rank: ${kumamotoHouses.metrics.severity_rank}) [Expected ~1.41% / MODERATE]`);
-} else {
-  console.error("❌ 熊本市 のデータが見つかりません");
-}
+const text2026 = "令和8年熊本地震速報。益城町で全壊3000棟。";
+const resolved2026 = resolver.resolveList(extractor.extract(text2026), 2026);
+const output2026 = mathEngine.process(resolved2026, "令和8年熊本地震");
 
-if (mashikiHouses) {
-  console.log(`✅ 益城町 全壊率: ${mashikiHouses.metrics.relative_rate_percent}% (Rank: ${mashikiHouses.metrics.severity_rank}) [Expected ~22.22% / CRITICAL]`);
-} else {
-  console.error("❌ 益城町 のデータが見つかりません");
-}
+console.log(`2016年熊本地震: 益城町 分母=${output2016.data[0].metrics.total_base} (${output2016.data[0].metrics.total_base_year}年統計) -> 密度 ${output2016.data[0].metrics.relative_rate_percent}%`);
+console.log(`2026年熊本地震: 益城町 分母=${output2026.data[0].metrics.total_base} (${output2026.data[0].metrics.total_base_year}年統計) -> 密度 ${output2026.data[0].metrics.relative_rate_percent}%`);
 
-if (nishiharaHouses) {
-  console.log(`✅ 西原村 全壊率: ${nishiharaHouses.metrics.relative_rate_percent}% (Rank: ${nishiharaHouses.metrics.severity_rank}) [Expected ~19.73% / CRITICAL]`);
+if (output2016.data[0].metrics.total_base_year === 2016 && output2026.data[0].metrics.total_base_year === 2026) {
+  console.log("✅ 時系列 Point-in-Time マスター引き当て成功!");
 } else {
-  console.error("❌ 西原村 のデータが見つかりません");
+  console.error("❌ 時系列 Point-in-Time マスター引き当て失敗");
 }

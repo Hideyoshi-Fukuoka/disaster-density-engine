@@ -28,6 +28,25 @@ app.use(express.static(path.join(__dirname, "../public"), {
   }
 }));
 
+// 災害年検出ヘルパー（発生日時直前の分母マスター同期用）
+function detectDisasterYear(text = "", disasterName = "", timestamp = "") {
+  if (timestamp && typeof timestamp === "string" && timestamp.length >= 4) {
+    const y = parseInt(timestamp.substring(0, 4), 10);
+    if (!isNaN(y) && y >= 1900 && y <= 2100) return y;
+  }
+  const combined = (disasterName + " " + text).toLowerCase();
+  
+  if (combined.includes("平成28年") || combined.includes("2016")) return 2016;
+  if (combined.includes("令和2年") || combined.includes("2020")) return 2020;
+  if (combined.includes("令和6年") || combined.includes("2024")) return 2024;
+  if (combined.includes("令和8年") || combined.includes("2026")) return 2026;
+
+  const m = combined.match(/(20\d{2})年/);
+  if (m) return parseInt(m[1], 10);
+
+  return 2026;
+}
+
 // 1. テキスト解析 & 被害密度算出 API
 app.post("/api/parse", (req, res) => {
   try {
@@ -36,8 +55,9 @@ app.post("/api/parse", (req, res) => {
       return res.status(400).json({ error: "分析対象のテキストを入力してください。" });
     }
 
+    const disasterYear = detectDisasterYear(text, disaster_name || "");
     const extracted = extractor.extract(text);
-    const resolved = resolver.resolveList(extracted);
+    const resolved = resolver.resolveList(extracted, disasterYear);
     const result = mathEngine.process(resolved, disaster_name || "災害被害速報");
 
     return res.json(result);
@@ -55,10 +75,7 @@ app.post("/api/gov/parse-url", async (req, res) => {
       return res.status(400).json({ error: "解析対象の総務省URLを入力してください。" });
     }
 
-    // URLの検索・一致確認または外部Webサイトからの動的フェッチ
     let reportData = null;
-
-    // 定義済みインデックスとの照合
     const searchMatch = (await govFetcher.search(url))[0];
     if (searchMatch && searchMatch.url === url) {
       reportData = searchMatch;
@@ -76,12 +93,12 @@ app.post("/api/gov/parse-url", async (req, res) => {
     }
 
     if (!reportData) {
-      // フォールバック（緊急情報ポータルデータ）
       reportData = await govFetcher.getById("soumu-kinkyu-000690");
     }
 
+    const disasterYear = detectDisasterYear(reportData.text, reportData.disaster_name, reportData.timestamp);
     const extracted = extractor.extract(reportData.text);
-    const resolved = resolver.resolveList(extracted);
+    const resolved = resolver.resolveList(extracted, disasterYear);
     const parsedResult = mathEngine.process(resolved, reportData.disaster_name);
 
     res.json({
@@ -144,8 +161,9 @@ app.post("/api/gov/fetch-and-parse", async (req, res) => {
       reportData = await govFetcher.getById(report_id);
     }
 
+    const disasterYear = detectDisasterYear(reportData.text, reportData.disaster_name, reportData.timestamp);
     const extracted = extractor.extract(reportData.text);
-    const resolved = resolver.resolveList(extracted);
+    const resolved = resolver.resolveList(extracted, disasterYear);
     const parsedResult = mathEngine.process(resolved, reportData.disaster_name);
 
     res.json({
