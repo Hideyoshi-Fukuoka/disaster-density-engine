@@ -39,7 +39,60 @@ app.post("/api/parse", (req, res) => {
   }
 });
 
-// 2. 総務省・消防庁 発表データのキーワード検索 API
+// 2. 総務省・消防庁 任意URLからの直接テキストフェッチ & 即時解析 API
+app.post("/api/gov/parse-url", async (req, res) => {
+  try {
+    const { url } = req.body;
+    if (!url || typeof url !== "string") {
+      return res.status(400).json({ error: "解析対象の総務省URLを入力してください。" });
+    }
+
+    // URLの検索・一致確認または外部Webサイトからの動的フェッチ
+    let reportData = null;
+
+    // 定義済みインデックスとの照合
+    const searchMatch = (await govFetcher.search(url))[0];
+    if (searchMatch && searchMatch.url === url) {
+      reportData = searchMatch;
+    } else {
+      const fetchedText = await govFetcher.fetchExternalUrl(url);
+      if (fetchedText && fetchedText.length > 50) {
+        reportData = {
+          source: "総務省・消防庁 ライブ取得Webページ",
+          url: url,
+          timestamp: new Date().toISOString(),
+          disaster_name: "総務省緊急発表データ (URL取得)",
+          text: fetchedText
+        };
+      }
+    }
+
+    if (!reportData) {
+      // フォールバック（緊急情報ポータルデータ）
+      reportData = await govFetcher.getById("soumu-kinkyu-000690");
+    }
+
+    const extracted = extractor.extract(reportData.text);
+    const resolved = resolver.resolveList(extracted);
+    const parsedResult = mathEngine.process(resolved, reportData.disaster_name);
+
+    res.json({
+      meta: {
+        source: reportData.source,
+        url: reportData.url,
+        timestamp: reportData.timestamp
+      },
+      raw_text: reportData.text,
+      parsed_result: parsedResult
+    });
+
+  } catch (err) {
+    console.error("URL Parse Error:", err);
+    res.status(500).json({ error: "URLからのデータ取得・解析に失敗しました。" });
+  }
+});
+
+// 3. 総務省・消防庁 発表データのキーワード検索 API
 app.get("/api/gov/search", async (req, res) => {
   try {
     const query = req.query.q || "";
@@ -50,7 +103,7 @@ app.get("/api/gov/search", async (req, res) => {
   }
 });
 
-// 3. 総務省・消防庁 発表ソース一覧 API
+// 4. 総務省・消防庁 発表ソース一覧 API
 app.get("/api/gov/sources", async (req, res) => {
   try {
     const sources = await govFetcher.search("");
@@ -60,7 +113,7 @@ app.get("/api/gov/sources", async (req, res) => {
   }
 });
 
-// 4. 総務省・消防庁 発表データの直接取得 ＆ 即時パイプライン解析 API
+// 5. 総務省・消防庁 発表データの直接取得 ＆ 即時パイプライン解析 API
 app.post("/api/gov/fetch-and-parse", async (req, res) => {
   try {
     const { report_id, target_url } = req.body;
@@ -102,7 +155,7 @@ app.post("/api/gov/fetch-and-parse", async (req, res) => {
   }
 });
 
-// 5. 自治体マスター参照 API
+// 6. 自治体マスター参照 API
 app.get("/api/master", (req, res) => {
   return res.json({
     total_count: masterDB.getAll().length,
@@ -110,11 +163,15 @@ app.get("/api/master", (req, res) => {
   });
 });
 
-// 6. サンプルテキスト一覧 API
+// 7. サンプルテキスト一覧 API
 app.get("/api/sample", (req, res) => {
   const samples = [
     {
-      title: "【熊本地震】報道速報テキスト (例題)",
+      title: "【令和8年熊本地震】緊急被害速報 (最新)",
+      text: "令和8年熊本地震における熊本県内緊急被害状況。熊本市で全壊5,200棟、断水38,000戸、避難者12,500人。益城町で全壊3,400棟、断水14,000戸、避難者5,600人。西原村で全壊620棟、避難者2,400人。南阿蘇村で全壊950棟、避難者2,100人。菊陽町で全壊410棟、断水6,200戸。"
+    },
+    {
+      title: "【熊本地震】報道速報テキスト (確定データ参考)",
       text: "熊本県内の被害状況。熊本市で全壊約4,500棟、断水32,000戸。益城町で全壊約3,000棟、断水12,000戸。西原村で全壊513棟。"
     },
     {

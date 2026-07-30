@@ -34,7 +34,6 @@ document.addEventListener("DOMContentLoaded", () => {
   let chartInstance = null;
 
   // Initialize
-  fetchPresets();
   searchGovSources("");
   executeParse();
 
@@ -143,30 +142,6 @@ document.addEventListener("DOMContentLoaded", () => {
     } finally {
       btnGovFetch.disabled = false;
       btnGovFetch.textContent = "取得＆自動計算 ⚡";
-    }
-  }
-
-  /**
-   * プリセットサンプルの取得とボタン描画
-   */
-  async function fetchPresets() {
-    try {
-      const res = await fetch("/api/sample");
-      const samples = await res.json();
-      presetButtonsContainer.innerHTML = "";
-      samples.forEach(sample => {
-        const btn = document.createElement("button");
-        btn.className = "preset-btn";
-        btn.textContent = sample.title;
-        btn.addEventListener("click", () => {
-          disasterNameInput.value = sample.title;
-          inputTextarea.value = sample.text;
-          executeParse();
-        });
-        presetButtonsContainer.appendChild(btn);
-      });
-    } catch (e) {
-      console.error("Failed to load presets:", e);
     }
   }
 
