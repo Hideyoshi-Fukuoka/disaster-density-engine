@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Disaster Density Engine - 被害密度算出可視化エンジン</title>
+
+  <!-- Google Fonts & Chart.js -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Background Decorative Glows -->
+  <div class="bg-glow glow-1"></div>
+  <div class="bg-glow glow-2"></div>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header class="main-header">
+      <div class="brand">
+        <div class="brand-icon">⚡</div>
+        <div>
+          <h1>Disaster Density Engine</h1>
+          <p class="subtitle">報道「絶対数」から自治体「全体数（分母）」を引き当て「被害密度（%）」を即時可視化</p>
+        </div>
+      </div>
+      <div class="header-badges">
+        <span class="badge status-live"><span class="dot"></span> Live Engine</span>
+        <span class="badge tech-tag">JIS Code Dynamic Match</span>
+        <span class="badge gov-tag">🏛️ 総務省・消防庁データ連携</span>
+      </div>
+    </header>
+
+    <!-- Main Content Grid -->
+    <main class="content-grid">
+      <!-- Input Panel -->
+      <section class="panel input-panel">
+        <div class="panel-header">
+          <h2><span class="icon">📝</span> 災害報道・行政発表テキスト</h2>
+          <span class="hint">非構造化テキストを入力</span>
+        </div>
+
+        <!-- Government Source Automatic Fetcher Banner -->
+        <div class="gov-fetch-box">
+          <label>🏛️ 総務省・消防庁 公式報道発表の動的フェッチ:</label>
+          <div class="gov-controls">
+            <select id="govSourceSelect">
+              <option value="">-- 総務省・消防庁の発表データを選択 --</option>
+            </select>
+            <button id="btnGovFetch" class="btn btn-gov">取得＆自動計算 ⚡</button>
+          </div>
+        </div>
+
+        <!-- Preset Sample Buttons -->
+        <div class="sample-presets">
+          <label>手動テスト用 プリセット:</label>
+          <div class="preset-buttons" id="presetButtons">
+            <!-- JavaScript dynamically loads sample presets -->
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="disasterName">災害名・タイトル</label>
+          <input type="text" id="disasterName" value="熊本地震（想定データ）" placeholder="例: 熊本地震被害速報">
+        </div>
+
+        <div class="form-group">
+          <label for="inputText">報道文章テキスト</label>
+          <textarea id="inputText" rows="5" placeholder="テキストを入力してください。">熊本県内の被害状況。熊本市で全壊約4,500棟、断水32,000戸。益城町で全壊約3,000棟、断水12,000戸。西原村で全壊513棟。</textarea>
+        </div>
+
+        <button id="btnParse" class="btn btn-primary">
+          <span class="btn-text">⚡ 被害密度（相対数%）を解析・算出</span>
+        </button>
+      </section>
+
+      <!-- Visualization Controls & Summary -->
+      <section class="panel mode-panel">
+        <div class="mode-header">
+          <div>
+            <h2><span class="icon">📊</span> Dual-Mode Visualizer</h2>
+            <p class="mode-desc">絶対数（規模）と相対数（密度%）を比較切替</p>
+          </div>
+          <!-- Dual-Mode Switch Toggle -->
+          <div class="mode-switch-container">
+            <button class="mode-btn active" id="btnModeRelative" data-mode="relative">
+              <span class="icon">🔥</span> 被害密度 (%) モード <small>(相対数)</small>
+            </button>
+            <button class="mode-btn" id="btnModeAbsolute" data-mode="absolute">
+              <span class="icon">🏢</span> 被害規模 モード <small>(絶対数)</small>
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter & Stats Bar -->
+        <div class="filter-bar">
+          <div class="filter-group">
+            <label for="filterDamageType">被害種別フィルタ:</label>
+            <select id="filterDamageType">
+              <option value="ALL">すべて表示</option>
+              <option value="collapsed_houses">全壊・住家被害</option>
+              <option value="water_outage">断水</option>
+              <option value="evacuees">避難者</option>
+            </select>
+          </div>
+          <div class="stats-summary" id="statsSummary">
+            <!-- Dynamic Summary Stats -->
+          </div>
+        </div>
+
+        <!-- Chart View -->
+        <div class="chart-container">
+          <canvas id="densityChart"></canvas>
+        </div>
+      </section>
+
+      <!-- Data Table & Output JSON Panel -->
+      <section class="panel full-width-panel">
+        <div class="tab-header">
+          <button class="tab-btn active" id="tabBtnTable">📋 自治体別 被害密度解析テーブル</button>
+          <button class="tab-btn" id="tabBtnJson">{ } Output JSON Schema (API結果)</button>
+        </div>
+
+        <!-- Table View -->
+        <div id="tabViewTable" class="tab-content active">
+          <div class="table-wrapper">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>JISコード</th>
+                  <th>都道府県</th>
+                  <th>自治体名</th>
+                  <th>被害種別</th>
+                  <th>被害絶対数 (分子)</th>
+                  <th>自治体全体数 (分母)</th>
+                  <th>被害密度 (%)</th>
+                  <th>重症度ランク</th>
+                </tr>
+              </thead>
+              <tbody id="tableBody">
+                <!-- Dynamic Rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- JSON Schema View -->
+        <div id="tabViewJson" class="tab-content">
+          <div class="json-actions">
+            <button id="btnCopyJson" class="btn btn-secondary btn-sm">📋 JSONをコピー</button>
+            <span class="json-badge">Output JSON Schema (Required Format)</span>
+          </div>
+          <pre id="jsonViewer" class="json-viewer"><code>/* 解析ボタンを押すとここに結果JSONが表示されます */</code></pre>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="main-footer">
+      <p>Disaster-Density-Engine &copy; 2026 | Disaster Damage Dynamic Density Analytics Platform</p>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

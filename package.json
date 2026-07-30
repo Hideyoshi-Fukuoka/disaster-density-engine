@@ -1,0 +1,15 @@
+{
+  "name": "disaster-density-engine",
+  "version": "1.0.0",
+  "description": "Disaster Density Engine: Dynamic resolution of absolute damage counts to municipality total base for relative impact visualization",
+  "main": "backend/server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node backend/server.js",
+    "test": "node tests/test_engine.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "cors": "^2.8.5"
+  }
+}

@@ -1,0 +1,82 @@
+[
+  {
+    "jis_code": "43201",
+    "prefecture": "熊本県",
+    "city_name": "熊本市",
+    "city_kana": "クマモトシ",
+    "total_households": 320000,
+    "total_population": 738000,
+    "total_buildings": 340000,
+    "aliases": ["熊本市", "熊本市中央区", "熊本市東区", "熊本市西区", "熊本市南区", "熊本市北区", "熊本"]
+  },
+  {
+    "jis_code": "43441",
+    "prefecture": "熊本県",
+    "city_name": "益城町",
+    "city_kana": "マシキマチ",
+    "total_households": 13500,
+    "total_population": 34000,
+    "total_buildings": 14200,
+    "aliases": ["益城町", "熊本県上益城郡益城町", "上益城郡益城町", "益城"]
+  },
+  {
+    "jis_code": "43443",
+    "prefecture": "熊本県",
+    "city_name": "西原村",
+    "city_kana": "ニシハラムラ",
+    "total_households": 2600,
+    "total_population": 6800,
+    "total_buildings": 2750,
+    "aliases": ["西原村", "熊本県阿蘇郡西原村", "阿蘇郡西原村", "西原"]
+  },
+  {
+    "jis_code": "43442",
+    "prefecture": "熊本県",
+    "city_name": "南阿蘇村",
+    "city_kana": "ミナミアソムラ",
+    "total_households": 4200,
+    "total_population": 10500,
+    "total_buildings": 4600,
+    "aliases": ["南阿蘇村", "熊本県阿蘇郡南阿蘇村", "阿蘇郡南阿蘇村", "南阿蘇"]
+  },
+  {
+    "jis_code": "17204",
+    "prefecture": "石川県",
+    "city_name": "輪島市",
+    "city_kana": "ワジマシ",
+    "total_households": 10200,
+    "total_population": 23500,
+    "total_buildings": 11000,
+    "aliases": ["輪島市", "輪島"]
+  },
+  {
+    "jis_code": "17205",
+    "prefecture": "石川県",
+    "city_name": "珠洲市",
+    "city_kana": "スズシ",
+    "total_households": 5600,
+    "total_population": 12800,
+    "total_buildings": 6000,
+    "aliases": ["珠洲市", "珠洲"]
+  },
+  {
+    "jis_code": "17463",
+    "prefecture": "石川県",
+    "city_name": "能登町",
+    "city_kana": "ノトチョウ",
+    "total_households": 6500,
+    "total_population": 15000,
+    "total_buildings": 6900,
+    "aliases": ["能登町", "鳳珠郡能登町", "能登"]
+  },
+  {
+    "jis_code": "04201",
+    "prefecture": "宮城県",
+    "city_name": "仙台市",
+    "city_kana": "センダイシ",
+    "total_households": 520000,
+    "total_population": 1090000,
+    "total_buildings": 540000,
+    "aliases": ["仙台市", "仙台市青葉区", "仙台市宮城野区", "仙台市若林区", "仙台市太白区", "仙台市泉区", "仙台"]
+  }
+]
