@@ -36,6 +36,7 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -77,6 +78,7 @@ body {
   padding: 24px 20px;
   position: relative;
   z-index: 1;
+  width: 100%;
 }
 
 /* Header */
@@ -103,6 +105,7 @@ body {
   align-items: center;
   justify-content: center;
   box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
+  flex-shrink: 0;
 }
 .brand h1 {
   font-size: 24px;
@@ -118,7 +121,8 @@ body {
 }
 .header-badges {
   display: flex;
-  gap: 10px;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 .badge {
   padding: 6px 12px;
@@ -153,9 +157,11 @@ body {
   display: grid;
   grid-template-columns: 460px 1fr;
   gap: 24px;
+  width: 100%;
 }
 .full-width-panel {
   grid-column: 1 / -1;
+  width: 100%;
 }
 
 /* Glass Panels */
@@ -167,6 +173,8 @@ body {
   border-radius: var(--radius-lg);
   padding: 24px;
   box-shadow: var(--shadow-glow);
+  width: 100%;
+  overflow: hidden; /* 子要素のオーバーフローを防止 */
 }
 .panel-header {
   display: flex;
@@ -184,6 +192,43 @@ body {
 .hint {
   font-size: 12px;
   color: var(--text-dim);
+}
+
+/* Government Fetch Box */
+.gov-fetch-box {
+  background: rgba(56, 189, 248, 0.06);
+  border: 1px dashed var(--accent-cyan);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  margin-bottom: 16px;
+}
+.gov-fetch-box label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent-cyan);
+  display: block;
+  margin-bottom: 8px;
+}
+.gov-search-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.gov-controls {
+  display: flex;
+  gap: 8px;
+}
+.btn-gov {
+  background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+  color: #fff;
+  white-space: nowrap;
+  padding: 10px 14px;
+  font-size: 13px;
+  border-radius: var(--radius-md);
+  min-height: 44px;
+}
+.btn-gov:hover {
+  box-shadow: 0 0 15px rgba(139, 92, 246, 0.4);
 }
 
 /* Sample Presets */
@@ -205,57 +250,20 @@ body {
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid var(--border-glass);
   color: var(--text-main);
-  padding: 8px 12px;
+  padding: 10px 12px;
   border-radius: var(--radius-md);
   font-size: 12px;
   cursor: pointer;
   text-align: left;
   transition: var(--transition);
+  min-height: 40px;
 }
 .preset-btn:hover {
   background: rgba(56, 189, 248, 0.12);
   border-color: var(--accent-cyan);
 }
 
-/* Government Fetch Box */
-.gov-fetch-box {
-  background: rgba(56, 189, 248, 0.06);
-  border: 1px dashed var(--accent-cyan);
-  border-radius: var(--radius-md);
-  padding: 12px 14px;
-  margin-bottom: 16px;
-}
-.gov-fetch-box label {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--accent-cyan);
-  display: block;
-  margin-bottom: 8px;
-}
-.gov-search-row {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-.gov-controls {
-  display: flex;
-  gap: 8px;
-}
-
-.btn-gov {
-  background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
-  color: #fff;
-  white-space: nowrap;
-  padding: 8px 14px;
-  font-size: 12px;
-  border-radius: var(--radius-md);
-}
-.btn-gov:hover {
-  box-shadow: 0 0 15px rgba(139, 92, 246, 0.4);
-}
-
 /* Form Controls */
-
 .form-group {
   margin-bottom: 16px;
 }
@@ -271,11 +279,12 @@ input[type="text"], textarea, select {
   background: rgba(15, 23, 42, 0.6);
   border: 1px solid var(--border-glass);
   border-radius: var(--radius-md);
-  padding: 10px 14px;
+  padding: 12px 14px;
   color: var(--text-main);
   font-family: inherit;
   font-size: 14px;
   transition: var(--transition);
+  min-height: 44px;
 }
 input[type="text"]:focus, textarea:focus, select:focus {
   outline: none;
@@ -284,6 +293,7 @@ input[type="text"]:focus, textarea:focus, select:focus {
 }
 textarea {
   resize: vertical;
+  min-height: 100px;
 }
 
 /* Buttons */
@@ -292,21 +302,22 @@ textarea {
   align-items: center;
   justify-content: center;
   width: 100%;
-  padding: 12px 20px;
+  padding: 14px 20px;
   border-radius: var(--radius-md);
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
   border: none;
   transition: var(--transition);
+  min-height: 48px;
 }
 .btn-primary {
   background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
   color: #0b0f19;
   box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
 }
-.btn-primary:hover {
-  transform: translateY(-2px);
+.btn-primary:hover, .btn-primary:active {
+  transform: translateY(-1px);
   box-shadow: 0 6px 20px rgba(56, 189, 248, 0.45);
 }
 .btn-secondary {
@@ -319,8 +330,9 @@ textarea {
 }
 .btn-sm {
   width: auto;
-  padding: 6px 12px;
-  font-size: 12px;
+  padding: 8px 14px;
+  font-size: 13px;
+  min-height: 40px;
 }
 
 /* Dual-Mode Visualizer Header & Switch */
@@ -347,7 +359,7 @@ textarea {
   background: transparent;
   border: none;
   color: var(--text-muted);
-  padding: 8px 16px;
+  padding: 10px 18px;
   border-radius: 24px;
   font-size: 13px;
   font-weight: 600;
@@ -356,11 +368,11 @@ textarea {
   display: flex;
   align-items: center;
   gap: 6px;
+  min-height: 42px;
 }
 .mode-btn *, .tab-btn * {
   pointer-events: none;
 }
-
 .mode-btn small {
   opacity: 0.7;
 }
@@ -385,6 +397,8 @@ textarea {
   padding: 10px 16px;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-glass);
+  flex-wrap: wrap;
+  gap: 10px;
 }
 .filter-group {
   display: flex;
@@ -395,12 +409,14 @@ textarea {
 }
 .filter-group select {
   width: auto;
-  padding: 4px 10px;
+  padding: 6px 12px;
+  min-height: 38px;
 }
 .stats-summary {
   display: flex;
-  gap: 16px;
+  gap: 14px;
   font-size: 13px;
+  flex-wrap: wrap;
 }
 .stat-item {
   display: flex;
@@ -419,23 +435,28 @@ textarea {
   width: 100%;
 }
 
-/* Tabs & Tables */
+/* Tabs & Tables (モバイル折り返し・完全フィット設計) */
 .tab-header {
   display: flex;
-  gap: 12px;
+  gap: 8px;
   border-bottom: 1px solid var(--border-glass);
   margin-bottom: 18px;
+  width: 100%;
+  flex-wrap: wrap; /* スマホでボタンが折り返せるように */
 }
 .tab-btn {
   background: transparent;
   border: none;
   color: var(--text-muted);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
-  padding: 10px 16px;
+  padding: 10px 14px;
   cursor: pointer;
   border-bottom: 2px solid transparent;
   transition: var(--transition);
+  min-height: 44px;
+  flex: 1;
+  text-align: center;
 }
 .tab-btn.active {
   color: var(--accent-cyan);
@@ -443,6 +464,7 @@ textarea {
 }
 .tab-content {
   display: none;
+  width: 100%;
 }
 .tab-content.active {
   display: block;
@@ -451,24 +473,29 @@ textarea {
 /* Data Table */
 .table-wrapper {
   overflow-x: auto;
+  width: 100%;
+  -webkit-overflow-scrolling: touch;
 }
 .data-table {
   width: 100%;
   border-collapse: collapse;
   text-align: left;
   font-size: 13px;
+  min-width: 600px;
 }
 .data-table th {
   background: rgba(15, 23, 42, 0.8);
   color: var(--text-muted);
   font-weight: 600;
-  padding: 12px;
+  padding: 12px 10px;
   border-bottom: 1px solid var(--border-glass);
+  white-space: nowrap;
 }
 .data-table td {
-  padding: 12px;
+  padding: 12px 10px;
   border-bottom: 1px solid var(--border-glass);
   color: var(--text-main);
+  white-space: nowrap;
 }
 .data-table tr:hover {
   background: rgba(255, 255, 255, 0.03);
@@ -504,12 +531,15 @@ textarea {
   border: 1px solid var(--rank-low);
 }
 
-/* JSON Viewer */
+/* JSON Viewer (モバイル完全幅フィット) */
 .json-actions {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
+  width: 100%;
 }
 .json-badge {
   font-size: 11px;
@@ -519,13 +549,18 @@ textarea {
   background: #070a12;
   border: 1px solid var(--border-glass);
   border-radius: var(--radius-md);
-  padding: 16px;
+  padding: 14px;
   max-height: 380px;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
   overflow-y: auto;
   font-family: 'Courier New', Courier, monospace;
-  font-size: 12px;
+  font-size: 11px;
   color: #a5f3fc;
   line-height: 1.5;
+  white-space: pre-wrap;       /* スマホでの自動折り返し */
+  word-break: break-all;       /* 長い単語の溢れ防止 */
 }
 
 /* Footer */
@@ -536,4 +571,127 @@ textarea {
   color: var(--text-dim);
   padding-top: 20px;
   border-top: 1px solid var(--border-glass);
+}
+
+
+/* ==========================================================================
+   📱 Mobile First Responsive Media Queries
+   ========================================================================== */
+
+@media (max-width: 992px) {
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-container {
+    padding: 14px 10px;
+  }
+
+  .main-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+
+  .brand h1 {
+    font-size: 20px;
+  }
+
+  .brand-icon {
+    width: 44px;
+    height: 44px;
+    font-size: 24px;
+  }
+
+  .header-badges {
+    width: 100%;
+  }
+
+  .panel {
+    padding: 14px;
+    border-radius: 12px;
+  }
+
+  /* Gov search controls mobile vertical stack */
+  .gov-search-row {
+    flex-direction: row;
+  }
+  .gov-controls {
+    flex-direction: column;
+  }
+  .btn-gov {
+    width: 100%;
+  }
+
+  /* Dual Mode Switch full width for touch */
+  .mode-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .mode-switch-container {
+    width: 100%;
+  }
+  .mode-btn {
+    flex: 1;
+    justify-content: center;
+    padding: 8px 6px;
+    font-size: 12px;
+  }
+
+  .chart-container {
+    height: 280px;
+  }
+
+  .filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .stats-summary {
+    justify-content: space-between;
+  }
+
+  .tab-header {
+    flex-direction: column;
+    border-bottom: none;
+    gap: 6px;
+  }
+  .tab-btn {
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-md);
+    background: rgba(15, 23, 42, 0.6);
+  }
+  .tab-btn.active {
+    background: rgba(56, 189, 248, 0.15);
+    border-color: var(--accent-cyan);
+  }
+}
+
+@media (max-width: 480px) {
+  .brand h1 {
+    font-size: 17px;
+  }
+
+  .subtitle {
+    font-size: 11px;
+  }
+
+  .gov-search-row {
+    flex-direction: column;
+  }
+
+  .mode-btn {
+    font-size: 11px;
+    padding: 6px 4px;
+  }
+  .mode-btn small {
+    display: none;
+  }
+
+  .chart-container {
+    height: 250px;
+  }
 }
