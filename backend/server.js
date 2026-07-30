@@ -14,6 +14,7 @@ const govFetcher = require("./gov_fetcher");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const HOST = process.env.HOST || "0.0.0.0";
 
 app.use(cors());
 app.use(express.json());
@@ -38,23 +39,50 @@ app.post("/api/parse", (req, res) => {
   }
 });
 
-// 2. 総務省・消防庁 報道発表ソース一覧 API
+// 2. 総務省・消防庁 発表データのキーワード検索 API
+app.get("/api/gov/search", async (req, res) => {
+  try {
+    const query = req.query.q || "";
+    const results = await govFetcher.search(query);
+    res.json({ count: results.length, results });
+  } catch (err) {
+    res.status(500).json({ error: "総務省データの検索に失敗しました。" });
+  }
+});
+
+// 3. 総務省・消防庁 発表ソース一覧 API
 app.get("/api/gov/sources", async (req, res) => {
   try {
-    const sources = await govFetcher.getOfficialSources();
+    const sources = await govFetcher.search("");
     res.json({ sources });
   } catch (err) {
     res.status(500).json({ error: "総務省データ一覧の取得に失敗しました。" });
   }
 });
 
-// 3. 総務省・消防庁 発表データの直接取得 ＆ 即時パイプライン解析 API
+// 4. 総務省・消防庁 発表データの直接取得 ＆ 即時パイプライン解析 API
 app.post("/api/gov/fetch-and-parse", async (req, res) => {
   try {
-    const { report_id } = req.body;
-    const reportData = await govFetcher.fetchReport(report_id);
+    const { report_id, target_url } = req.body;
+    let reportData = null;
 
-    // 取得テキストをそのままパイプラインへ接続
+    if (target_url) {
+      const fetchedText = await govFetcher.fetchExternalUrl(target_url);
+      if (fetchedText) {
+        reportData = {
+          source: "総務省・消防庁 外部ウェブサイト",
+          url: target_url,
+          timestamp: new Date().toISOString(),
+          disaster_name: "リアルタイム取得災害データ",
+          text: fetchedText
+        };
+      }
+    }
+
+    if (!reportData) {
+      reportData = await govFetcher.getById(report_id);
+    }
+
     const extracted = extractor.extract(reportData.text);
     const resolved = resolver.resolveList(extracted);
     const parsedResult = mathEngine.process(resolved, reportData.disaster_name);
@@ -74,7 +102,7 @@ app.post("/api/gov/fetch-and-parse", async (req, res) => {
   }
 });
 
-// 4. 自治体マスター参照 API
+// 5. 自治体マスター参照 API
 app.get("/api/master", (req, res) => {
   return res.json({
     total_count: masterDB.getAll().length,
@@ -82,7 +110,7 @@ app.get("/api/master", (req, res) => {
   });
 });
 
-// 5. サンプルテキスト一覧 API
+// 6. サンプルテキスト一覧 API
 app.get("/api/sample", (req, res) => {
   const samples = [
     {
@@ -108,8 +136,8 @@ app.get("/api/health", (req, res) => {
 
 // サーバー起動
 if (require.main === module) {
-  app.listen(PORT, () => {
-    console.log(`🚀 Disaster-Density-Engine Server running on http://localhost:${PORT}`);
+  app.listen(PORT, HOST, () => {
+    console.log(`🚀 Disaster-Density-Engine Server running on http://${HOST}:${PORT}`);
   });
 }
 

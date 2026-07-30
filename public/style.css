@@ -232,10 +232,16 @@ body {
   display: block;
   margin-bottom: 8px;
 }
+.gov-search-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
 .gov-controls {
   display: flex;
   gap: 8px;
 }
+
 .btn-gov {
   background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
   color: #fff;

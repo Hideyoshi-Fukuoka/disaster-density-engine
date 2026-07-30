@@ -45,12 +45,16 @@
           <span class="hint">非構造化テキストを入力</span>
         </div>
 
-        <!-- Government Source Automatic Fetcher Banner -->
+        <!-- Government Source Live Search Box -->
         <div class="gov-fetch-box">
-          <label>🏛️ 総務省・消防庁 公式報道発表の動的フェッチ:</label>
-          <div class="gov-controls">
+          <label>🏛️ 総務省・消防庁 発表データのライブ検索・自動取得:</label>
+          <div class="gov-search-row">
+            <input type="text" id="govSearchInput" placeholder="キーワード検索 (例: 能登, 熊本, 台風, 豪雨, 浸水)">
+            <button id="btnGovSearch" class="btn btn-secondary btn-sm">🔍 検索</button>
+          </div>
+          <div class="gov-controls" style="margin-top: 8px;">
             <select id="govSourceSelect">
-              <option value="">-- 総務省・消防庁の発表データを選択 --</option>
+              <option value="">-- 検索・取得対象の発表を選択 --</option>
             </select>
             <button id="btnGovFetch" class="btn btn-gov">取得＆自動計算 ⚡</button>
           </div>

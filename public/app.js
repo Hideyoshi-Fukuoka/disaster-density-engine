@@ -9,6 +9,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const inputTextarea = document.getElementById("inputText");
   const presetButtonsContainer = document.getElementById("presetButtons");
 
+  const govSearchInput = document.getElementById("govSearchInput");
+  const btnGovSearch = document.getElementById("btnGovSearch");
   const govSourceSelect = document.getElementById("govSourceSelect");
   const btnGovFetch = document.getElementById("btnGovFetch");
 
@@ -33,12 +35,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Initialize
   fetchPresets();
-  fetchGovSources();
+  searchGovSources("");
   executeParse();
 
   // Event Listeners
   btnParse.addEventListener("click", executeParse);
   btnGovFetch.addEventListener("click", fetchAndParseGovData);
+
+  btnGovSearch.addEventListener("click", () => {
+    searchGovSources(govSearchInput.value);
+  });
+
+  govSearchInput.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+      searchGovSources(govSearchInput.value);
+    }
+  });
 
   btnModeRelative.addEventListener("click", (e) => {
     e.preventDefault();
@@ -65,23 +77,32 @@ document.addEventListener("DOMContentLoaded", () => {
   btnCopyJson.addEventListener("click", copyJsonToClipboard);
 
   /**
-   * 総務省・消防庁発表一覧の取得
+   * 総務省・消防庁 発表データのキーワード検索
    */
-  async function fetchGovSources() {
+  async function searchGovSources(query = "") {
     try {
-      const res = await fetch("/api/gov/sources");
+      btnGovSearch.disabled = true;
+      btnGovSearch.textContent = "⏳ 検索中...";
+
+      const res = await fetch(`/api/gov/search?q=${encodeURIComponent(query)}`);
       const data = await res.json();
-      govSourceSelect.innerHTML = '<option value="">-- 総務省・消防庁の発表データを選択 --</option>';
-      if (data.sources) {
-        data.sources.forEach(src => {
+
+      govSourceSelect.innerHTML = "";
+      if (data.results && data.results.length > 0) {
+        data.results.forEach(src => {
           const opt = document.createElement("option");
           opt.value = src.id;
-          opt.textContent = src.disaster_name;
+          opt.textContent = `[${src.source}] ${src.title}`;
           govSourceSelect.appendChild(opt);
         });
+      } else {
+        govSourceSelect.innerHTML = '<option value="">該当する総務省発表が見つかりません</option>';
       }
     } catch (e) {
-      console.error("Failed to load gov sources:", e);
+      console.error("Failed to search gov sources:", e);
+    } finally {
+      btnGovSearch.disabled = false;
+      btnGovSearch.textContent = "🔍 検索";
     }
   }
 
