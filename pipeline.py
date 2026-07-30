@@ -96,8 +96,12 @@ class DisasterDensityPipeline:
         """被害種別に応じて分母（世帯数、住家数、総人口）を選択"""
         if damage_type == "evacuees":
             return master_record.get("total_population") or master_record.get("total_households") or 10000
+        elif damage_type == "collapsed_houses":
+            return master_record.get("total_buildings") or master_record.get("total_households") or 10000
         else:
-            return master_record.get("total_households") or master_record.get("total_buildings") or 10000
+            households = master_record.get("total_households") or 0
+            buildings = master_record.get("total_buildings") or 0
+            return max(households, buildings) or 10000
 
     def _calculate_severity_rank(self, relative_rate_percent: float) -> str:
         """被害率に応じた重症度ランク判定"""
@@ -133,7 +137,9 @@ class DisasterDensityPipeline:
                 total_base = 10000
 
             abs_count = entity["absolute_count"]
-            rate_percent = round((abs_count / total_base) * 100, 2) if total_base > 0 else 0.0
+            raw_rate = round((abs_count / total_base) * 100, 2) if total_base > 0 else 0.0
+            # 100.0% 上限キャップガード
+            rate_percent = min(100.0, raw_rate)
             severity_rank = self._calculate_severity_rank(rate_percent)
 
             formatted_data.append({

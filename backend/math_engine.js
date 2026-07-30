@@ -13,7 +13,9 @@ class MathEngine {
   calculateRelativeRate(absoluteCount, totalBase) {
     if (!totalBase || totalBase <= 0) return 0;
     const rate = (absoluteCount / totalBase) * 100;
-    return Math.round(rate * 100) / 100;
+    const rounded = Math.round(rate * 100) / 100;
+    // 密度割合の上限を 100.00% にガード補正
+    return Math.min(100.0, rounded);
   }
 
   /**
@@ -36,12 +38,16 @@ class MathEngine {
   selectTotalBase(resolvedItem) {
     switch (resolvedItem.damage_type) {
       case "evacuees":
+        // 避難者数は総人口を分母
         return resolvedItem.total_population || resolvedItem.total_households || 10000;
       case "collapsed_houses":
+        // 住家被害は総建築・住家棟数または世帯数を分母
+        return resolvedItem.total_buildings || resolvedItem.total_households || 10000;
       case "water_outage":
       case "power_outage":
       default:
-        return resolvedItem.total_households || resolvedItem.total_buildings || 10000;
+        // 断水・停電は契約・事業者含むため建物総数と世帯数の大きい方を優先分母とする
+        return Math.max(resolvedItem.total_buildings || 0, resolvedItem.total_households || 0) || 10000;
     }
   }
 

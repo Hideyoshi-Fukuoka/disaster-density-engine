@@ -4,9 +4,9 @@
     "prefecture": "熊本県",
     "city_name": "熊本市",
     "city_kana": "クマモトシ",
-    "total_households": 320000,
+    "total_households": 338000,
     "total_population": 738000,
-    "total_buildings": 340000,
+    "total_buildings": 395000,
     "aliases": ["熊本市", "熊本市中央区", "熊本市東区", "熊本市西区", "熊本市南区", "熊本市北区", "熊本"]
   },
   {
@@ -14,9 +14,9 @@
     "prefecture": "熊本県",
     "city_name": "益城町",
     "city_kana": "マシキマチ",
-    "total_households": 13500,
-    "total_population": 34000,
-    "total_buildings": 14200,
+    "total_households": 15800,
+    "total_population": 34800,
+    "total_buildings": 16500,
     "aliases": ["益城町", "熊本県上益城郡益城町", "上益城郡益城町", "益城"]
   },
   {
@@ -24,9 +24,9 @@
     "prefecture": "熊本県",
     "city_name": "西原村",
     "city_kana": "ニシハラムラ",
-    "total_households": 2600,
-    "total_population": 6800,
-    "total_buildings": 2750,
+    "total_households": 3100,
+    "total_population": 6900,
+    "total_buildings": 3300,
     "aliases": ["西原村", "熊本県阿蘇郡西原村", "阿蘇郡西原村", "西原"]
   },
   {
@@ -34,10 +34,50 @@
     "prefecture": "熊本県",
     "city_name": "南阿蘇村",
     "city_kana": "ミナミアソムラ",
-    "total_households": 4200,
+    "total_households": 4500,
     "total_population": 10500,
-    "total_buildings": 4600,
+    "total_buildings": 4900,
     "aliases": ["南阿蘇村", "熊本県阿蘇郡南阿蘇村", "阿蘇郡南阿蘇村", "南阿蘇"]
+  },
+  {
+    "jis_code": "43401",
+    "prefecture": "熊本県",
+    "city_name": "菊陽町",
+    "city_kana": "キクヨウマチ",
+    "total_households": 19800,
+    "total_population": 44200,
+    "total_buildings": 20500,
+    "aliases": ["菊陽町", "菊陽"]
+  },
+  {
+    "jis_code": "43211",
+    "prefecture": "熊本県",
+    "city_name": "宇土市",
+    "city_kana": "ウトシ",
+    "total_households": 15200,
+    "total_population": 36500,
+    "total_buildings": 16000,
+    "aliases": ["宇土市", "宇土"]
+  },
+  {
+    "jis_code": "43202",
+    "prefecture": "熊本県",
+    "city_name": "八代市",
+    "city_kana": "ヤツシロシ",
+    "total_households": 53500,
+    "total_population": 123000,
+    "total_buildings": 56000,
+    "aliases": ["八代市", "八代"]
+  },
+  {
+    "jis_code": "43444",
+    "prefecture": "熊本県",
+    "city_name": "御船町",
+    "city_kana": "ミフネマチ",
+    "total_households": 7200,
+    "total_population": 16800,
+    "total_buildings": 7600,
+    "aliases": ["御船町", "御船"]
   },
   {
     "jis_code": "17204",
