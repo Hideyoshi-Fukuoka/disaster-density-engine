@@ -695,3 +695,32 @@ textarea {
     height: 250px;
   }
 }
+
+/* ==========================================================================
+   Zero Layout Shift & i18n Responsive Adjustments
+   ========================================================================== */
+.mode-btn, .btn, .stat-pill, .badge {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  max-width: 100%;
+}
+
+.mode-switch-container {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  min-height: 44px;
+}
+
+.language-switcher select {
+  min-width: 120px;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .mode-btn, .stat-pill {
+    white-space: normal;
+    word-break: break-word;
+  }
+}

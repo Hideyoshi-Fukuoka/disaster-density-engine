@@ -1,73 +1,79 @@
-# Disaster-Density-Engine (被害密度算出・二重軸可視化データエンジン)
+# Disaster-Density-Engine
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Node.js](https://img.shields.io/badge/Node.js-v24.13.1-brightgreen.svg)](https://nodejs.org/)
 [![Python](https://img.shields.io/badge/Python-3.x-blue.svg)](https://www.python.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-Strict-blue.svg)](https://www.typescriptlang.org/)
 
-> **「絶対数（規模）」の報道から災害発生直前の自治体「全体数（分母）」を動的に時系列引き当て、「被害密度（相対数: %）」を即座に算出・二重軸可視化するオープンデータエンジン**
+> 🇯🇵 **[日本語版 README はこちら (README_ja.md)](./README_ja.md)**
 
----
-
-## 📌 背景と課題意識
-
-災害発生時、報道や行政発表では **「熊本市で全壊約4,500棟」「益城町で全壊約3,000棟」「西原村で全壊513棟」** といった被害の「絶対数」が先行して伝えられます。
-
-しかし、大都市は人口・世帯数の規模が大きいため絶対数が大きく見える一方、人口や世帯数が少ない**過疎・中小自治体では「被害絶対数は500棟でも、全世帯の20%以上が全壊」という致命的被害が発生しているケース**が多くあります。
-
-`Disaster-Density-Engine` は、非構造化テキストから被害数値と自治体名を抽出・名寄せし、災害発生日時直前の総務省JISコードおよび国勢調査世帯数マスター（分母）と動的に結合することで、**「真の被害密度（重症度 %）」** を算出・可視化します。
+> **Open Data Engine dynamically resolving reported absolute disaster counts to municipal pre-disaster census baselines (denominators) for immediate relative impact density (%) calculation and dual-mode visualization.**
 
 ---
 
-## ⚡ 主な機能・特徴
+## 📌 Background & Motivation
 
-1. **⏱️ 災害発生日時に同期した時系列マスター引き当て (Point-in-Time Resolution)**
-   - 過去の災害（例: 2016年熊本地震）と現在進行中の災害（例: 令和8年熊本地震）で分母が異なる問題に対応。
-   - 災害発生日時（発生年）を自動判定し、**「その災害発生直前の最新自治体統計（世帯数・人口・建物数）」**を時系列で自動参照・結合します（参照年次 `total_base_year` を明記）。
-2. **📢 令和8年熊本地震 (進行中ハザード) & 動的最新報数（N_max）解決・優先ソートアーキテクチャ**
-   - 進行中の「令和8年熊本地震」最新発表データ（第14報）を標準サポート。
-   - 同一災害グループ内の最大報数（N_max）を自動判定し、`is_latest: true` および「・最新」表記を動的付与。
-   - 一般検索クエリ（例: 「令和8年熊本地震」）実行時、最新の最大報数が自動的に検索結果の最上位（トップ）へ昇格・優先ソートされます。
-   - 今後発表される「第15報」「第16報」等の将来の未定義速報クエリに対しても、動的補完生成と最新報数判定が同時に機能します。
-3. **🏛️ 総務省・消防庁 報道発表ライブ検索 & URL即時フェッチ**
-   - 総務省緊急情報ポータルや消防庁非常災害対策本部の速報を柔軟にキーワード検索（助詞除去・表記揺れ・全半角吸収）。
-   - 任意の報道WebページURLを直接指定して、本文から被害密度（%）を即時自動計算。
-4. **Text Entity Extractor & Entity Resolution**
-   - 桁区切り表記（例: 4,500棟）や文脈に対応した日本語災害テキスト抽出器。
-   - 「益城」「熊本県益城町」「上益城郡益城町」などの行政区画表記揺れをJISコードへ自動正規化。
-5. **Dual-Mode Visualizer (二重軸比較ダッシュボード)**
-   - **被害規模モード（絶対数順）**: 伝統的な大都市被害規模のソート表示。
-   - **被害密度モード（相対数%順）**: 致命的な被害密度の過疎・中小自治体が最上位に浮き出る重症度ハイライト可視化。
+During natural disaster emergency responses, initial news coverage and government press announcements predominantly highlight **absolute damage figures** (e.g., *"Kumamoto City: ~4,500 destroyed homes"*, *"Mashiki Town: ~3,000 destroyed homes"*, *"Nishihara Village: 513 destroyed homes"*).
+
+However, because large metropolitan areas possess extensive baseline populations and building stocks, their absolute counts naturally appear larger. Conversely, in **rural or smaller municipalities, an absolute count of 500 destroyed homes might represent over 20% of the entire municipality's household stock—an extreme, catastrophic disaster impact ratio** that is frequently masked by raw absolute numbers.
+
+`Disaster-Density-Engine` parses unstructured disaster news reports, performs entity resolution against Japanese Industrial Standards (JIS) 5-digit municipal codes, dynamically joins pre-disaster census baseline denominators (households, population, total building stock), and calculates the **true Disaster Impact Density (%)**.
 
 ---
 
-## 🏗️ システムアーキテクチャ
+## ⚡ Key Features
+
+1. **⏱️ Synchronized Point-in-Time Census Denominator Resolution**
+   - Resolves denominator discrepancies between past disaster events (e.g., 2016 Kumamoto Earthquake) and ongoing hazards (e.g., 2026 Reiwa 8 Kumamoto Earthquake).
+   - Automatically detects disaster occurrence year and joins the census baseline immediately preceding the disaster (`total_base_year`).
+2. **📢 2026 Reiwa 8 Kumamoto Earthquake Support & Dynamic $N_{\max}$ Bulletin Resolution**
+   - Built-in support for ongoing 2026 Reiwa 8 Kumamoto Earthquake emergency bulletins (Bulletin #14).
+   - Dynamically determines the maximum report number $N_{\max}$ within a disaster series, tagging `is_latest: true` and boosting it to top-priority search resolution.
+   - Future undefined bulletin queries (e.g., "Bulletin #15", "Bulletin #16") are automatically synthesized and resolved as latest.
+3. **🌐 Type-Safe i18n Architecture & DRR / GIS Domain Glossary**
+   - Strict TypeScript dictionary architecture enforcing `typeof ja` key parity across languages (`ja.ts` / `en.ts`).
+   - Standardized Disaster Risk Reduction (DRR) and GIS domain terms (*Disaster Impact Density*, *Evacuation Order*, *Inundation Depth*, *Building Collapse Rate*, *Potentially Isolated Areas*).
+   - Responsive Zero Layout Shift design ensuring flawless UI rendering when toggling languages.
+4. **🏛️ Real-Time Government Bulletin Search & Live Scraping**
+   - Live query searching against Ministry of Internal Affairs and Communications (MIC) & Fire and Disaster Management Agency (FDMA) feeds.
+   - Instant web scraping from arbitrary government news URLs to parse impact density ratios.
+5. **Text Entity Extractor & JIS Code Entity Resolution**
+   - Context-aware Japanese text entity extraction with digit normalization.
+   - Automatic normalization of ambiguous municipal names (e.g., "Mashiki", "Mashiki-machi", "Kamimashiki District Mashiki Town") to 5-digit JIS codes.
+6. **Dual-Mode Visualizer Dashboard**
+   - **Absolute Magnitude Mode**: Sorted by traditional raw damage counts (large cities first).
+   - **Impact Density Mode (%)**: Highlights severely devastated small/rural municipalities at the top of the queue.
+
+---
+
+## 🏗️ System Architecture
 
 ```mermaid
 graph TD
-    A[報道・行政発表テキスト / 総務省速報URL] --> B[Text Entity Extractor & Year Detector]
-    B --> C[抽出エンティティ JSON + 発生年]
+    A[Unstructured News Text / Government Bulletin URL] --> B[Text Entity Extractor & Year Detector]
+    B --> C[Extracted Entities JSON + Occurrence Year]
     C --> D[Entity Resolution & Math Engine]
-    E[(時系列 Master DB: 年度別JISコード・世帯数)] -->|Point-in-Time 同期| D
-    D --> F[Dual-Mode Output JSON Schema total_base_year付き]
-    F --> G[Dual-Mode Web Dashboard UI]
+    E[(Time-Series Master DB: Yearly JIS Codes & Census Base)] -->|Point-in-Time Sync| D
+    D --> F[Dual-Mode Output JSON Schema with total_base_year]
+    F --> G[Dual-Mode Web Dashboard UI & Type-Safe i18n Layer]
 ```
 
 ---
 
-## 📋 Output JSON Schema 仕様
+## 📋 Output JSON Schema Specification
 
-本エンジンが出力する標準 JSON フォーマットです（時系列参照年次 `total_base_year` および最新フラグ `is_latest` を含みます）。
+Standardized output JSON payload generated by the engine (includes `total_base_year` and `is_latest` flags):
 
 ```json
 {
   "timestamp": "2026-07-31T08:00:00Z",
-  "disaster_name": "令和8年熊本地震 (消防庁被害速報第14報・最新)",
+  "disaster_name": "2026 Reiwa 8 Kumamoto Earthquake (FDMA Emergency Bulletin #14 - Latest)",
   "is_latest": true,
   "data": [
     {
       "jis_code": "43201",
-      "prefecture": "熊本県",
-      "city_name": "熊本市",
+      "prefecture": "Kumamoto Prefecture",
+      "city_name": "Kumamoto City",
       "metrics": {
         "damage_type": "collapsed_houses",
         "absolute_count": 5500,
@@ -79,8 +85,8 @@ graph TD
     },
     {
       "jis_code": "43441",
-      "prefecture": "熊本県",
-      "city_name": "益城町",
+      "prefecture": "Kumamoto Prefecture",
+      "city_name": "Mashiki Town",
       "metrics": {
         "damage_type": "collapsed_houses",
         "absolute_count": 3600,
@@ -92,8 +98,8 @@ graph TD
     },
     {
       "jis_code": "43443",
-      "prefecture": "熊本県",
-      "city_name": "西原村",
+      "prefecture": "Kumamoto Prefecture",
+      "city_name": "Nishihara Village",
       "metrics": {
         "damage_type": "collapsed_houses",
         "absolute_count": 650,
@@ -109,69 +115,75 @@ graph TD
 
 ---
 
-## 🚀 クイックスタート
+## 🚀 Quick Start
 
-### 開発環境要件
-- **Node.js** (v18.x 以上)
-- **Python** (3.8 以上) ※Python版パイプライン利用時
+### Prerequisites
+- **Node.js** (v18.x or higher)
+- **Python** (3.8 or higher) *when using Python pipeline*
 
-### 1. リポジトリのクローン & パッケージインストール
+### 1. Clone Repository & Install Dependencies
 ```bash
 git clone https://github.com/Hideyoshi-Fukuoka/Disaster-Density-Engine.git
 cd Disaster-Density-Engine
 npm install
 ```
 
-### 2. バックエンド API サーバー & ダッシュボードの起動 (Node.js)
+### 2. Launch Backend API Server & Dashboard (Node.js)
 ```bash
 npm start
-# または node backend/server.js
+# or node backend/server.js
 ```
-起動後、ブラウザで `http://localhost:3000` （またはデプロイURL `https://disaster-density-engine.vercel.app/`）にアクセスしてください。
+Open `http://localhost:3000` (or Vercel URL `https://disaster-density-engine.vercel.app/`) in your browser.
 
-### 3. 検証テストの実行
+### 3. Run Verification Tests
 ```bash
-# 検索・動的N_max最新解決・時系列同期テスト
+# Government Search & Dynamic N_max Resolution Test
 node tests/test_gov_search.js
 
-# コアエンジン・被害密度算出テスト
+# Core Engine & Math Density Test
 node tests/test_engine.js
 
-# Python 版パイプラインの実行
-python pipeline.py
+# Type-Safe i18n & Domain Glossary Test
+npx tsx tests/test_i18n.js
+
+# TypeScript Strict Compiler Check
+npx -p typescript tsc --noEmit
 ```
 
 ---
 
-## 📁 フォルダ構成
+## 📁 Directory Structure
 
 ```text
 Disaster-Density-Engine/
 ├── backend/
-│   ├── extractor.js        # 非構造化テキスト解析・抽出器
-│   ├── gov_fetcher.js      # 総務省・消防庁報道発表動的フェッチャー & N_max最新解決エンジン
-│   ├── master_db.js        # 時系列(Point-in-Time) JISコード・世帯数マスターDB
-│   ├── math_engine.js      # 相対数(%)計算・100%上限ガード・重症度判定
-│   ├── resolver.js         # 表記揺れ名寄せ (Entity Resolution)
-│   └── server.js           # REST API サーバー
-├── public/                 # ダッシュボード UI (HTML/CSS/JS)
-│   ├── index.html
-│   ├── style.css
-│   └── app.js
-├── seeds/                  # 自治体マスターシードデータ (CSV/JSON)
-│   ├── municipalities_master.csv
-│   └── municipalities_master.json
-├── tests/                  # パイプライン単体検証テスト
-│   ├── test_engine.js
-│   └── test_gov_search.js
-├── master_db.py            # Python版 Master DB & 名寄せモジュール
-├── pipeline.py             # Python版 コアパイプライン
+│   ├── extractor.js        # Unstructured text entity extractor
+│   ├── gov_fetcher.js      # Live government bulletin search & N_max resolution
+│   ├── master_db.js        # Time-series (Point-in-Time) JIS census master DB
+│   ├── math_engine.js      # Impact density math engine & severity classification
+│   ├── resolver.js         # Municipal entity resolution & JIS code normalizer
+│   └── server.js           # REST API server
+├── src/
+│   ├── i18n/
+│   │   ├── config.ts       # Locales configuration & Dictionary type
+│   │   ├── get-dictionary.ts# Dictionary async/sync loader utility
+│   │   └── dictionaries/
+│   │       ├── ja.ts       # Japanese master dictionary (as const)
+│   │       └── en.ts       # English dictionary (strictly typed via ja)
+│   ├── types/
+│   │   └── gis-domain.ts   # DRR & GIS domain model type definitions
+│   └── components/         # i18n-enabled React UI components
+├── public/                 # Web Dashboard UI (HTML/CSS/JS)
+├── seeds/                  # Municipal master census seed data (CSV/JSON)
+├── tests/                  # Pipeline & i18n unit tests
+├── tsconfig.json
 ├── package.json
-└── README.md
+├── README.md               # English README (Main)
+└── README_ja.md            # Japanese README
 ```
 
 ---
 
-## 📄 ライセンス (License)
+## 📄 License
 
-本プロジェクトは **[MIT License](LICENSE)** の下で公開されています。商用・非商用を問わず自由にご利用・改変・再配布いただけます。
+This project is licensed under the **[MIT License](LICENSE)**. Free for commercial and non-commercial use, modification, and redistribution.
