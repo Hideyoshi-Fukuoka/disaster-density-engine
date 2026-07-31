@@ -181,6 +181,33 @@ app.post("/api/gov/fetch-and-parse", async (req, res) => {
   }
 });
 
+// 5.5. IDによる総務省・消防庁 発表データの直接取得 API (GET)
+app.get("/api/gov/fetch", async (req, res) => {
+  try {
+    const reportId = req.query.id;
+    if (!reportId) {
+      return res.status(400).json({ success: false, error: "IDが指定されていません。" });
+    }
+    const reportData = await govFetcher.getById(reportId);
+    if (!reportData) {
+      return res.status(404).json({ success: false, error: "指定された発表データが見つかりません。" });
+    }
+    return res.json({
+      success: true,
+      id: reportData.id,
+      title: reportData.title,
+      disaster_name: reportData.disaster_name,
+      source: reportData.source,
+      timestamp: reportData.timestamp,
+      url: reportData.url,
+      text: reportData.text
+    });
+  } catch (err) {
+    console.error("Gov Fetch API Error:", err);
+    return res.status(500).json({ success: false, error: "発表データの取得に失敗しました。" });
+  }
+});
+
 // 6. 自治体マスター参照 API
 app.get("/api/master", (req, res) => {
   return res.json({
