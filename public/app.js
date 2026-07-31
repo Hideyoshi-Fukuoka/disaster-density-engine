@@ -98,7 +98,7 @@ document.addEventListener("DOMContentLoaded", () => {
         { term: "避難所 (Evacuation Center / Shelter)", desc: "被災者を安全に収容・支援する物理的な避難施設。" },
         { term: "想定被害 (Estimated Damage)", desc: "シミュレーションモデルや初期速報に基づくモデル予測被害数値。" },
         { term: "被害率 (Damage Ratio)", desc: "総世帯数・人口・建物数に対する被災割合（%）。" },
-        { term: "建物倒壊率 (Building Collapse Rate)", desc: "全全壊・半壊を含む自治体全体の構造物損壊割合。" },
+        { term: "建物倒壊率 (Building Collapse Rate)", desc: "全壊・半壊を含む自治体全体の構造物損壊割合。" },
         { term: "孤立可能性地域 (Potentially Isolated)", desc: "土砂崩れや道路途絶によるインフラ孤立予測地域。" },
         { term: "浸水深 (Inundation Depth)", desc: "洪水・高潮・津波による想定・観測水深（m）。" },
         { term: "震度 (Seismic Intensity)", desc: "気象庁震度階級（JMA Scale）による地震動強度。" },
@@ -181,8 +181,8 @@ document.addEventListener("DOMContentLoaded", () => {
   btnLangJa.addEventListener("click", () => setLanguage("ja"));
   btnLangEn.addEventListener("click", () => setLanguage("en"));
 
-  btnParse.addEventListener("click", executeParse);
-  btnGovFetch.addEventListener("click", fetchAndParseGovData);
+  btnParse.addEventListener("click", () => executeParse());
+  btnGovFetch.addEventListener("click", () => fetchAndParseGovData());
 
   btnGovSearch.addEventListener("click", () => {
     searchGovSources(govSearchInput.value);
@@ -256,7 +256,9 @@ document.addEventListener("DOMContentLoaded", () => {
     setPlaceholder("disasterName", dict.disasterNamePlaceholder);
     setText("i18nInputTextLabel", dict.inputTextLabel);
     setPlaceholder("inputText", dict.inputTextPlaceholder);
-    setText("i18nBtnParse", dict.btnParse);
+
+    const btnTextEl = document.getElementById("i18nBtnParse") || btnParse.querySelector(".btn-text") || btnParse;
+    if (btnTextEl) btnTextEl.textContent = dict.btnParse;
 
     setText("i18nModeDesc", dict.modeDesc);
     setText("i18nModeRelativeText", dict.modeRelativeText);
@@ -324,18 +326,20 @@ document.addEventListener("DOMContentLoaded", () => {
   async function searchGovSources(query = "") {
     try {
       btnGovSearch.disabled = true;
-      const dict = i18nDict[currentLang];
       btnGovSearch.textContent = currentLang === "ja" ? "⏳ 検索中..." : "⏳ Searching...";
 
       const res = await fetch(`/api/gov/search?q=${encodeURIComponent(query)}`);
       const data = await res.json();
 
+      const selectedVal = govSourceSelect.value;
       govSourceSelect.innerHTML = "";
+
       if (data.results && data.results.length > 0) {
         data.results.forEach(src => {
           const opt = document.createElement("option");
           opt.value = src.id;
           opt.textContent = `[${src.source}] ${src.title}`;
+          if (src.id === selectedVal) opt.selected = true;
           govSourceSelect.appendChild(opt);
         });
       } else {
@@ -370,7 +374,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (data.success) {
         disasterNameInput.value = data.disaster_name || data.title;
         inputTextarea.value = data.text;
-        executeParse();
+        await executeParse();
       } else {
         alert((currentLang === "ja" ? "データ取得失敗: " : "Fetch failed: ") + (data.error || ""));
       }
@@ -388,16 +392,20 @@ document.addEventListener("DOMContentLoaded", () => {
    */
   async function executeParse() {
     const text = inputTextarea.value.trim();
-    const disasterName = disasterNameInput.value.trim() || "被害緊急解析";
+    const disasterName = disasterNameInput.value.trim() || (currentLang === "ja" ? "被害緊急解析" : "Emergency Impact Analysis");
 
     if (!text) {
       alert(currentLang === "ja" ? "解析対象の文章テキストを入力してください。" : "Please enter report text to analyze.");
       return;
     }
 
+    const btnTextEl = document.getElementById("i18nBtnParse") || btnParse.querySelector(".btn-text") || btnParse;
+
     try {
       btnParse.disabled = true;
-      btnParse.querySelector(".btn-text").textContent = currentLang === "ja" ? "⏳ 解析・密度計算中..." : "⏳ Calculating Impact Density...";
+      if (btnTextEl) {
+        btnTextEl.textContent = currentLang === "ja" ? "⏳ 解析・密度計算中..." : "⏳ Calculating Impact Density...";
+      }
 
       const response = await fetch("/api/parse", {
         method: "POST",
@@ -414,7 +422,9 @@ document.addEventListener("DOMContentLoaded", () => {
       alert(currentLang === "ja" ? "解析処理に失敗しました。サーバーログをご確認ください。" : "Parsing failed. Please check server logs.");
     } finally {
       btnParse.disabled = false;
-      btnParse.querySelector(".btn-text").textContent = i18nDict[currentLang].btnParse;
+      if (btnTextEl) {
+        btnTextEl.textContent = i18nDict[currentLang].btnParse;
+      }
     }
   }
 
@@ -480,7 +490,6 @@ document.addEventListener("DOMContentLoaded", () => {
    * 統計サマリーの描画
    */
   function renderStatsSummary(list) {
-    const dict = i18nDict[currentLang];
     if (list.length === 0) {
       statsSummary.innerHTML = `<span class="stat-pill">${currentLang === 'ja' ? '該当データなし' : 'No data found'}</span>`;
       return;
@@ -555,9 +564,9 @@ document.addEventListener("DOMContentLoaded", () => {
               label: function(context) {
                 const item = list[context.dataIndex];
                 if (activeMode === "relative") {
-                  return ` 被害密度: ${item.metrics.relative_rate_percent.toFixed(2)}% (分子:${item.metrics.absolute_count.toLocaleString()} / 分母:${item.metrics.total_base.toLocaleString()})`;
+                  return ` ${currentLang === 'ja' ? '被害密度' : 'Impact Density'}: ${item.metrics.relative_rate_percent.toFixed(2)}% (${currentLang === 'ja' ? '分子' : 'Num'}:${item.metrics.absolute_count.toLocaleString()} / ${currentLang === 'ja' ? '分母' : 'Denom'}:${item.metrics.total_base.toLocaleString()})`;
                 } else {
-                  return ` 被害規模: ${item.metrics.absolute_count.toLocaleString()} 単位`;
+                  return ` ${currentLang === 'ja' ? '被害規模' : 'Absolute Count'}: ${item.metrics.absolute_count.toLocaleString()}`;
                 }
               }
             }
