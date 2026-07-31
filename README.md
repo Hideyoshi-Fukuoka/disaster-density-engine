@@ -23,9 +23,11 @@
 1. **⏱️ 災害発生日時に同期した時系列マスター引き当て (Point-in-Time Resolution)**
    - 過去の災害（例: 2016年熊本地震）と現在進行中の災害（例: 令和8年熊本地震）で分母が異なる問題に対応。
    - 災害発生日時（発生年）を自動判定し、**「その災害発生直前の最新自治体統計（世帯数・人口・建物数）」**を時系列で自動参照・結合します（参照年次 `total_base_year` を明記）。
-2. **📢 令和8年熊本地震 (進行中ハザード) & 動的「第N報」自動適応機能**
-   - 進行中の「令和8年熊本地震」最新発表データを標準サポート。
-   - 今後発表される「第14報」「第15報」等の新しい速報に対しても、クエリから報数を動的に解読・補完生成し、未定義データでも即座に検索・選択・解析が可能です。
+2. **📢 令和8年熊本地震 (進行中ハザード) & 動的最新報数（N_max）解決・優先ソートアーキテクチャ**
+   - 進行中の「令和8年熊本地震」最新発表データ（第14報）を標準サポート。
+   - 同一災害グループ内の最大報数（N_max）を自動判定し、`is_latest: true` および「・最新」表記を動的付与。
+   - 一般検索クエリ（例: 「令和8年熊本地震」）実行時、最新の最大報数が自動的に検索結果の最上位（トップ）へ昇格・優先ソートされます。
+   - 今後発表される「第15報」「第16報」等の将来の未定義速報クエリに対しても、動的補完生成と最新報数判定が同時に機能します。
 3. **🏛️ 総務省・消防庁 報道発表ライブ検索 & URL即時フェッチ**
    - 総務省緊急情報ポータルや消防庁非常災害対策本部の速報を柔軟にキーワード検索（助詞除去・表記揺れ・全半角吸収）。
    - 任意の報道WebページURLを直接指定して、本文から被害密度（%）を即時自動計算。
@@ -54,12 +56,13 @@ graph TD
 
 ## 📋 Output JSON Schema 仕様
 
-本エンジンが出力する標準 JSON フォーマットです（時系列参照年次 `total_base_year` を含みます）。
+本エンジンが出力する標準 JSON フォーマットです（時系列参照年次 `total_base_year` および最新フラグ `is_latest` を含みます）。
 
 ```json
 {
-  "timestamp": "2026-07-30T20:30:00Z",
-  "disaster_name": "令和8年熊本地震 (消防庁被害速報第13報・最新)",
+  "timestamp": "2026-07-31T08:00:00Z",
+  "disaster_name": "令和8年熊本地震 (消防庁被害速報第14報・最新)",
+  "is_latest": true,
   "data": [
     {
       "jis_code": "43201",
@@ -67,10 +70,10 @@ graph TD
       "city_name": "熊本市",
       "metrics": {
         "damage_type": "collapsed_houses",
-        "absolute_count": 5400,
+        "absolute_count": 5500,
         "total_base": 395000,
         "total_base_year": 2026,
-        "relative_rate_percent": 1.37,
+        "relative_rate_percent": 1.39,
         "severity_rank": "MODERATE"
       }
     },
@@ -80,10 +83,10 @@ graph TD
       "city_name": "益城町",
       "metrics": {
         "damage_type": "collapsed_houses",
-        "absolute_count": 3500,
+        "absolute_count": 3600,
         "total_base": 16500,
         "total_base_year": 2026,
-        "relative_rate_percent": 21.21,
+        "relative_rate_percent": 21.82,
         "severity_rank": "CRITICAL"
       }
     },
@@ -93,10 +96,10 @@ graph TD
       "city_name": "西原村",
       "metrics": {
         "damage_type": "collapsed_houses",
-        "absolute_count": 630,
+        "absolute_count": 650,
         "total_base": 3300,
         "total_base_year": 2026,
-        "relative_rate_percent": 19.09,
+        "relative_rate_percent": 19.70,
         "severity_rank": "CRITICAL"
       }
     }
@@ -128,7 +131,7 @@ npm start
 
 ### 3. 検証テストの実行
 ```bash
-# 検索・動的報数・時系列同期テスト
+# 検索・動的N_max最新解決・時系列同期テスト
 node tests/test_gov_search.js
 
 # コアエンジン・被害密度算出テスト
@@ -146,7 +149,7 @@ python pipeline.py
 Disaster-Density-Engine/
 ├── backend/
 │   ├── extractor.js        # 非構造化テキスト解析・抽出器
-│   ├── gov_fetcher.js      # 総務省・消防庁報道発表動的フェッチャー
+│   ├── gov_fetcher.js      # 総務省・消防庁報道発表動的フェッチャー & N_max最新解決エンジン
 │   ├── master_db.js        # 時系列(Point-in-Time) JISコード・世帯数マスターDB
 │   ├── math_engine.js      # 相対数(%)計算・100%上限ガード・重症度判定
 │   ├── resolver.js         # 表記揺れ名寄せ (Entity Resolution)
