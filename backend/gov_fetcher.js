@@ -10,10 +10,21 @@ class GovernmentDataFetcher {
   constructor() {
     this.liveDisasterIndex = [
       {
+        id: "fdma-kumamoto-2026-dai14hou",
+        source: "総務省消防庁 非常災害対策本部",
+        title: "令和8年熊本地震による被害状況および避難指示発令状況について（第14報）",
+        disaster_name: "令和8年熊本地震 (消防庁被害速報第14報)",
+        timestamp: "2026-07-31T08:00:00Z",
+        keywords: ["令和8年熊本地震", "第14報", "熊本地震第14報", "14報", "消防庁", "熊本", "益城", "西原", "南阿蘇", "菊陽", "宇土", "八代", "御船", "避難指示"],
+        aliases: ["令和8年熊本地震 第14報", "熊本地震第14報", "第14報", "14報", "消防庁第14報", "令和8年熊本地震第14報"],
+        url: "https://www.fdma.go.jp/disaster/info/items/20260731_kumamoto_14.pdf",
+        text: "総務省消防庁被害状況緊急公表（第14報）。令和8年熊本地震における全自治体最新被害速報。熊本市で全壊5500棟、半壊15000棟、断水38000戸、避難者13000人。益城町で全壊3600棟、断水14000戸、避難者5800人。西原村で全壊650棟、断水2800戸、避難者2500人。南阿蘇村で全壊980棟、避難者2200人。菊陽町で全壊430棟、断水6200戸。宇土市で全壊500棟、断水5100戸。八代市で住家被害750棟、避難者3900人。"
+      },
+      {
         id: "fdma-kumamoto-2026-dai13hou",
         source: "総務省消防庁 非常災害対策本部",
-        title: "令和8年熊本地震による被害状況および避難指示発令状況について（第13報・最新）",
-        disaster_name: "令和8年熊本地震 (消防庁被害速報第13報・最新)",
+        title: "令和8年熊本地震による被害状況および避難指示発令状況について（第13報）",
+        disaster_name: "令和8年熊本地震 (消防庁被害速報第13報)",
         timestamp: "2026-07-30T20:30:00Z",
         keywords: ["令和8年熊本地震", "第13報", "熊本地震第13報", "13報", "消防庁", "熊本", "益城", "西原", "南阿蘇", "菊陽", "宇土", "八代", "御船", "避難指示"],
         aliases: ["令和8年熊本地震 第13報", "熊本地震第13報", "第13報", "13報", "消防庁第13報", "令和8年熊本地震第13報"],
@@ -101,6 +112,32 @@ class GovernmentDataFetcher {
   }
 
   /**
+   * エントリから報数 N を動的に解析・抽出 (例: 第14報 -> 14)
+   */
+  parseReportNumber(item) {
+    if (!item) return 0;
+    const str = [item.title, item.disaster_name, item.id, item.text].join(" ");
+    // 全角英数を半角化
+    const normalized = str.replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xfee0));
+    const match = normalized.match(/(?:第)?(\d+)報/) || normalized.match(/dai(\d+)hou/i);
+    return match ? parseInt(match[1], 10) : 0;
+  }
+
+  /**
+   * エントリが属する災害グループIDを抽出
+   */
+  parseDisasterGroup(item) {
+    if (!item) return "other";
+    const str = [item.title, item.disaster_name, item.id, ...(item.keywords || [])].join(" ").toLowerCase();
+    if (str.includes("令和8年熊本地震") || (str.includes("熊本地震") && str.includes("2026"))) return "kumamoto_2026";
+    if (str.includes("平成28年熊本地震") || (str.includes("熊本地震") && str.includes("2016"))) return "kumamoto_2016";
+    if (str.includes("能登")) return "noto_2024";
+    if (str.includes("豪雨")) return "heavyrain_2020";
+    if (str.includes("熊本地震")) return "kumamoto_2026";
+    return "other";
+  }
+
+  /**
    * クエリのストップワード除去および正規化
    */
   normalizeQuery(query) {
@@ -129,24 +166,21 @@ class GovernmentDataFetcher {
    * キーワード・トークン検索
    */
   async search(query) {
-    if (!query || typeof query !== "string" || !query.trim()) {
-      return this.liveDisasterIndex;
-    }
+    const rawLower = (query || "").trim().toLowerCase();
+    const normalized = this.normalizeQuery(query || "");
 
-    const rawLower = query.trim().toLowerCase();
-    const normalized = this.normalizeQuery(query);
-
-    // 5. 動的「第N報」パース＆自動補完生成
-    const reportNumMatch = query.replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xfee0)).match(/(?:第)?(\d+)報/);
+    // 1. 動的「第N報」パース＆自動補完インファレンス
+    const reportNumMatch = (query || "").replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xfee0)).match(/(?:第)?(\d+)報/);
     let dynamicEntry = null;
+
     if (reportNumMatch) {
-      const num = reportNumMatch[1];
-      const existing = this.liveDisasterIndex.find(item => item.title.includes(`第${num}報`) || item.id.endsWith(`dai${num}hou`));
+      const num = parseInt(reportNumMatch[1], 10);
+      const existing = this.liveDisasterIndex.find(item => this.parseReportNumber(item) === num);
       if (!existing) {
         dynamicEntry = {
           id: `fdma-kumamoto-2026-dai${num}hou`,
           source: "総務省消防庁 非常災害対策本部 (動的集計速報)",
-          title: `令和8年熊本地震による被害状況および避難指示発令状況について（第${num}報・最新）`,
+          title: `令和8年熊本地震による被害状況および避難指示発令状況について（第${num}報）`,
           disaster_name: `令和8年熊本地震 (消防庁被害速報第${num}報)`,
           timestamp: new Date().toISOString(),
           keywords: ["令和8年熊本地震", `第${num}報`, `熊本地震第${num}報`, `${num}報`, "消防庁", "熊本", "益城", "西原", "南阿蘇", "菊陽", "宇土", "八代", "御船", "避難指示"],
@@ -157,7 +191,22 @@ class GovernmentDataFetcher {
       }
     }
 
-    const dataset = dynamicEntry ? [dynamicEntry, ...this.liveDisasterIndex] : this.liveDisasterIndex;
+    const dataset = dynamicEntry ? [dynamicEntry, ...this.liveDisasterIndex] : [...this.liveDisasterIndex];
+
+    // 2. 災害グループごとの最大報数 N_max を動的算出
+    const groupMaxReport = {};
+    dataset.forEach(item => {
+      const group = this.parseDisasterGroup(item);
+      const reportNum = this.parseReportNumber(item);
+      if (!groupMaxReport[group] || reportNum > groupMaxReport[group]) {
+        groupMaxReport[group] = reportNum;
+      }
+    });
+
+    if (!query || !query.trim()) {
+      // 全件表示時も最大報数を自動ラベリングして返す
+      return dataset.map(item => this.formatItemWithDynamicLabel(item, groupMaxReport));
+    }
 
     // 検索トークンの抽出
     const tokens = normalized
@@ -179,8 +228,13 @@ class GovernmentDataFetcher {
       return aliases;
     };
 
+    const targetSpecificReport = reportNumMatch ? parseInt(reportNumMatch[1], 10) : null;
+
     const scoredResults = dataset.map(item => {
       let score = 0;
+      const reportNum = this.parseReportNumber(item);
+      const group = this.parseDisasterGroup(item);
+      const isMaxReportInGroup = reportNum > 0 && reportNum === groupMaxReport[group];
 
       // 対象テキスト集合
       const fullText = [
@@ -192,14 +246,20 @@ class GovernmentDataFetcher {
         ...(item.aliases || [])
       ].join(" ").toLowerCase();
 
-      // 1. 完全/部分一致（生のクエリでの直接ヒット）
-      if (fullText.includes(rawLower)) {
-        score += 100;
+      // 1. 完全/部分一致（タイトル・災害名におけるクエリの直接ヒット）
+      if (item.title.toLowerCase().includes(rawLower) || item.disaster_name.toLowerCase().includes(rawLower)) {
+        score += 300;
+      } else if (fullText.includes(rawLower)) {
+        score += 150;
       }
 
       // 2. ストップワード除去後の正規化クエリ直接ヒット
-      if (normalized && fullText.includes(normalized)) {
-        score += 80;
+      if (normalized) {
+        if (item.title.toLowerCase().includes(normalized) || item.disaster_name.toLowerCase().includes(normalized)) {
+          score += 200;
+        } else if (fullText.includes(normalized)) {
+          score += 80;
+        }
       }
 
       // 3. トークンごとのマッチング評価
@@ -228,27 +288,79 @@ class GovernmentDataFetcher {
         score += 40;
       }
 
-      return { item, score };
+      // 5. 動的報数タイブレイカー（指定された報数がある場合は特化加算、一般検索時は同等ヒット内で最新Nを微加算優先）
+      if (score > 0) {
+        if (targetSpecificReport) {
+          if (reportNum === targetSpecificReport) {
+            score += 1000; // 特定報数指名時最優先
+          }
+        } else {
+          if (isMaxReportInGroup) {
+            score += 30; // 同災害内での最新報数トップブースト
+          }
+          score += reportNum * 0.1; // タイブレイカー
+        }
+      }
+
+      return { item, score, isMaxReport: isMaxReportInGroup, reportNum };
     });
 
-    // スコアが0より大きいものをフィルタリングし、スコア降順でソート
+    // スコアが0より大きいものをフィルタリングし、[スコア降順 > 最大報数降順 > 報数降順] でソート
     const filtered = scoredResults
       .filter(r => r.score > 0)
-      .sort((a, b) => b.score - a.score)
-      .map(r => r.item);
+      .sort((a, b) => {
+        if (Math.abs(b.score - a.score) > 0.01) {
+          return b.score - a.score;
+        }
+        if (a.item && b.item && this.parseDisasterGroup(a.item) === this.parseDisasterGroup(b.item)) {
+          return b.reportNum - a.reportNum;
+        }
+        return b.score - a.score;
+      })
+      .map(r => this.formatItemWithDynamicLabel(r.item, groupMaxReport));
 
     // フォールバック検索
     if (filtered.length === 0) {
-      return this.liveDisasterIndex.filter(item => {
+      return dataset.filter(item => {
         const fullText = [item.title, item.disaster_name, item.text, ...(item.keywords || []), ...(item.aliases || [])].join(" ").toLowerCase();
         if (rawLower.includes("熊本") && fullText.includes("熊本")) return true;
         if (rawLower.includes("能登") && fullText.includes("能登")) return true;
         if (rawLower.includes("豪雨") && fullText.includes("豪雨")) return true;
         return false;
-      });
+      }).map(item => this.formatItemWithDynamicLabel(item, groupMaxReport));
     }
 
     return filtered;
+  }
+
+  /**
+   * 最大報数 N_max を持つ最新アイテムに対し、自動で「・最新」表記と is_latest フラグを動的に整形・付与
+   */
+  formatItemWithDynamicLabel(item, groupMaxReport) {
+    const reportNum = this.parseReportNumber(item);
+    const group = this.parseDisasterGroup(item);
+    const isLatest = reportNum > 0 && reportNum === groupMaxReport[group];
+
+    let title = item.title.replace(/・最新\)/g, ")");
+    let disasterName = item.disaster_name.replace(/・最新\)/g, ")");
+
+    if (isLatest) {
+      if (!title.includes("最新")) {
+        title = title.replace(/（第(\d+)報）/, "（第$1報・最新）");
+        if (!title.includes("最新")) title += "（最新）";
+      }
+      if (!disasterName.includes("最新")) {
+        disasterName = disasterName.replace(/第(\d+)報\)/, "第$1報・最新)");
+        if (!disasterName.includes("最新")) disasterName += " (最新)";
+      }
+    }
+
+    return {
+      ...item,
+      title,
+      disaster_name: disasterName,
+      is_latest: isLatest
+    };
   }
 
   /**
