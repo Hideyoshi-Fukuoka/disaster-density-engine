@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <link rel="stylesheet" href="style.css?v=20260730_v2">
+  <link rel="stylesheet" href="style.css?v=20260731_v3">
 </head>
 <body>
 
@@ -25,14 +25,26 @@
       <div class="brand">
         <div class="brand-icon">⚡</div>
         <div>
-          <h1>Disaster Density Engine</h1>
-          <p class="subtitle">報道「絶対数」から自治体「全体数（分母）」を引き当て「被害密度（%）」を即時可視化</p>
+          <h1 id="i18nAppTitle">Disaster Density Engine</h1>
+          <p class="subtitle" id="i18nAppSubtitle">報道「絶対数」から自治体「全体数（分母）」を引き当て「被害密度（%）」を即時可視化</p>
         </div>
       </div>
-      <div class="header-badges">
-        <span class="badge status-live"><span class="dot"></span> Live Engine</span>
-        <span class="badge tech-tag">JIS Code Dynamic Match</span>
-        <span class="badge gov-tag">🏛️ 総務省・消防庁データ連携</span>
+      
+      <div className="header-right-controls" style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+        <div class="header-badges">
+          <span class="badge status-live"><span class="dot"></span> <span id="i18nBadgeLive">Live Engine</span></span>
+          <span class="badge tech-tag" id="i18nBadgeJis">JIS Code Dynamic Match</span>
+          <span class="badge gov-tag" id="i18nBadgeGov">🏛️ 総務省・消防庁データ連携</span>
+        </div>
+
+        <!-- Language Switcher Toggle Switch -->
+        <div class="lang-toggle-box" title="Toggle Language / 言語切替">
+          <span class="lang-icon">🌐</span>
+          <div class="lang-toggle-container">
+            <button id="btnLangJa" class="lang-toggle-btn active" data-lang="ja">🇯🇵 JP</button>
+            <button id="btnLangEn" class="lang-toggle-btn" data-lang="en">🇺🇸 EN</button>
+          </div>
+        </div>
       </div>
     </header>
 
@@ -41,37 +53,37 @@
       <!-- Input Panel -->
       <section class="panel input-panel">
         <div class="panel-header">
-          <h2><span class="icon">📝</span> 災害報道・行政発表テキスト</h2>
-          <span class="hint">非構造化テキストを入力</span>
+          <h2><span class="icon">📝</span> <span id="i18nInputTitle">災害報道・行政発表テキスト</span></h2>
+          <span class="hint" id="i18nInputHint">非構造化テキストを入力</span>
         </div>
 
         <!-- Government Source Live Search Box -->
         <div class="gov-fetch-box">
-          <label>🏛️ 総務省・消防庁 発表データのライブ検索・自動取得:</label>
+          <label id="i18nGovFetchLabel">🏛️ 総務省・消防庁 発表データのライブ検索・自動取得:</label>
           <div class="gov-search-row">
             <input type="text" id="govSearchInput" placeholder="キーワード・報数・URL検索 (例: 熊本地震, 第14報, 第15報, または総務省URL)">
             <button id="btnGovSearch" class="btn btn-secondary btn-sm">🔍 検索</button>
           </div>
           <div class="gov-controls" style="margin-top: 8px;">
             <select id="govSourceSelect">
-              <option value="">-- 検索・取得対象の発表を選択 --</option>
+              <option value="" id="i18nGovSelectDefault">-- 検索・取得対象の発表を選択 --</option>
             </select>
             <button id="btnGovFetch" class="btn btn-gov">取得＆自動計算 ⚡</button>
           </div>
         </div>
 
         <div class="form-group">
-          <label for="disasterName">災害名・タイトル</label>
+          <label for="disasterName" id="i18nDisasterNameLabel">災害名・タイトル</label>
           <input type="text" id="disasterName" value="令和8年熊本地震 (緊急被害速報)" placeholder="例: 令和8年熊本地震被害速報">
         </div>
 
         <div class="form-group">
-          <label for="inputText">報道文章テキスト</label>
+          <label for="inputText" id="i18nInputTextLabel">報道文章テキスト</label>
           <textarea id="inputText" rows="5" placeholder="テキストを入力してください。">令和8年熊本地震における熊本県内緊急被害状況。熊本市で全壊5,200棟、断水38,000戸、避難者12,500人。益城町で全壊3,400棟、断水14,000戸、避難者5,600人。西原村で全壊620棟、避難者2,400人。南阿蘇村で全壊950棟、避難者2,100人。菊陽町で全壊410棟、断水6,200戸。</textarea>
         </div>
 
         <button id="btnParse" class="btn btn-primary">
-          <span class="btn-text">⚡ 被害密度（相対数%）を解析・算出</span>
+          <span class="btn-text" id="i18nBtnParse">⚡ 被害密度（相対数%）を解析・算出</span>
         </button>
       </section>
 
@@ -80,15 +92,15 @@
         <div class="mode-header">
           <div>
             <h2><span class="icon">📊</span> Dual-Mode Visualizer</h2>
-            <p class="mode-desc">絶対数（規模）と相対数（密度%）を比較切替</p>
+            <p class="mode-desc" id="i18nModeDesc">絶対数（規模）と相対数（密度%）を比較切替</p>
           </div>
           <!-- Dual-Mode Switch Toggle -->
           <div class="mode-switch-container">
             <button class="mode-btn active" id="btnModeRelative" data-mode="relative">
-              <span class="icon">🔥</span> 被害密度 (%) モード <small>(相対数)</small>
+              <span class="icon">🔥</span> <span id="i18nModeRelativeText">被害密度 (%) モード</span> <small id="i18nModeRelativeSub">(相対数)</small>
             </button>
             <button class="mode-btn" id="btnModeAbsolute" data-mode="absolute">
-              <span class="icon">🏢</span> 被害規模 モード <small>(絶対数)</small>
+              <span class="icon">🏢</span> <span id="i18nModeAbsoluteText">被害規模 モード</span> <small id="i18nModeAbsoluteSub">(絶対数)</small>
             </button>
           </div>
         </div>
@@ -96,12 +108,12 @@
         <!-- Filter & Stats Bar -->
         <div class="filter-bar">
           <div class="filter-group">
-            <label for="filterDamageType">被害種別フィルタ:</label>
+            <label for="filterDamageType" id="i18nFilterLabel">被害種別フィルタ:</label>
             <select id="filterDamageType">
-              <option value="ALL">すべて表示</option>
-              <option value="collapsed_houses">全壊・住家被害</option>
-              <option value="water_outage">断水</option>
-              <option value="evacuees">避難者</option>
+              <option value="ALL" id="i18nFilterAll">すべて表示</option>
+              <option value="collapsed_houses" id="i18nFilterCollapsed">全壊・住家被害</option>
+              <option value="water_outage" id="i18nFilterWater">断水</option>
+              <option value="evacuees" id="i18nFilterEvacuees">避難者</option>
             </select>
           </div>
           <div class="stats-summary" id="statsSummary">
@@ -128,15 +140,15 @@
             <table class="data-table">
               <thead>
                 <tr>
-                  <th>JISコード</th>
-                  <th>都道府県</th>
-                  <th>自治体名</th>
-                  <th>被害種別</th>
-                  <th>被害絶対数 (分子)</th>
-                  <th>自治体全体数 (分母)</th>
-                  <th>分母参照年次</th>
-                  <th>被害密度 (%)</th>
-                  <th>重症度ランク</th>
+                  <th id="thJisCode">JISコード</th>
+                  <th id="thPrefecture">都道府県</th>
+                  <th id="thCityName">自治体名</th>
+                  <th id="thDamageType">被害種別</th>
+                  <th id="thAbsoluteCount">被害絶対数 (分子)</th>
+                  <th id="thTotalBase">自治体全体数 (分母)</th>
+                  <th id="thTotalBaseYear">分母参照年次</th>
+                  <th id="thRelativeRatePercent">被害密度 (%)</th>
+                  <th id="thSeverityRank">重症度ランク</th>
                 </tr>
               </thead>
               <tbody id="tableBody">
@@ -150,19 +162,29 @@
         <div id="tabViewJson" class="tab-content">
           <div class="json-actions">
             <button id="btnCopyJson" class="btn btn-secondary btn-sm">📋 JSONをコピー</button>
-            <span class="json-badge">Output JSON Schema (Required Format)</span>
+            <span class="json-badge" id="i18nJsonBadge">Output JSON Schema (Required Format)</span>
           </div>
           <pre id="jsonViewer" class="json-viewer"><code>/* 解析ボタンを押すとここに結果JSONが表示されます */</code></pre>
+        </div>
+      </section>
+
+      <!-- DRR & GIS Domain Glossary Panel -->
+      <section class="panel full-width-panel glossary-panel" style="margin-top: 10px;">
+        <div class="panel-header">
+          <h2><span class="icon">📖</span> <span id="i18nGlossaryTitle">Disaster Risk Reduction (DRR) & GIS Domain Glossary</span></h2>
+        </div>
+        <div class="glossary-grid" id="glossaryGrid">
+          <!-- Dynamic Glossary Cards -->
         </div>
       </section>
     </main>
 
     <!-- Footer -->
     <footer class="main-footer">
-      <p>Disaster-Density-Engine &copy; 2026 | Disaster Damage Dynamic Density Analytics Platform</p>
+      <p id="i18nFooterText">Disaster-Density-Engine &copy; 2026 | Disaster Damage Dynamic Density Analytics Platform</p>
     </footer>
   </div>
 
-  <script src="app.js?v=20260730_v2"></script>
+  <script src="app.js?v=20260731_v3"></script>
 </body>
 </html>
